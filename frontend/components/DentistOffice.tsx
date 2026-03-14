@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import ChatPage from "./ChatPage";
 import { HabitCoachPrompt, useHabitCoachPrompt } from "./HabitCoachPrompt";
 import { SunlifePrompt, useSunlifePrompt } from "./SunlifePrompt";
+import { ClinicLocatorPrompt, useClinicLocatorPrompt } from "./ClinicLocatorPrompt";
 import TreatmentPage from "../app/treatment/page";
 
 // ── World dimensions ─────────────────────────────────────────────────────────
@@ -19,15 +20,15 @@ const SPAWN_Y = 276;
 
 const SPRITES: Record<string, string> = {
   front: "/char_front.png",
-  back:  "/char_back.png",
-  left:  "/char_left.png",
+  back: "/char_back.png",
+  left: "/char_left.png",
   right: "/char_right.png",
 };
 
 // Agent zones — calibrated world positions with activation radius
 const AGENT_ZONES = [
-  { id: "habit",     label: "Habit Coach",       emoji: "🪥", wx: 493, wy: 259, r: 80 },
-  { id: "clinic",    label: "Clinic Locator",    emoji: "📍", wx: 737, wy: 416, r: 80 },
+  { id: "habit", label: "Habit Coach", emoji: "🪥", wx: 493, wy: 259, r: 80 },
+  { id: "clinic", label: "Clinic Locator", emoji: "📍", wx: 737, wy: 416, r: 80 },
   { id: "financial", label: "Financial Planner", emoji: "💰", wx: 576, wy: 634, r: 80 },
 ];
 
@@ -132,25 +133,25 @@ function AgentModal({ agentId, onClose }: { agentId: string; onClose: () => void
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function DentistOffice() {
-  const [stage, setStage]                     = useState<Stage>(0);
-  const [flash, setFlash]         = useState(false);
+  const [stage, setStage] = useState<Stage>(0);
+  const [flash, setFlash] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [charPulse, setCharPulse]             = useState(false);
+  const [charPulse, setCharPulse] = useState(false);
   // "idle" | "fadein" | "zooming"
-  const [zoomPhase, setZoomPhase]   = useState<"idle"|"fadein"|"zooming">("idle");
+  const [zoomPhase, setZoomPhase] = useState<"idle" | "fadein" | "zooming">("idle");
   const [zoomOpacity, setZoomOpacity] = useState(0);
-  const [zoomScale,   setZoomScale]   = useState(3.7);
+  const [zoomScale, setZoomScale] = useState(3.7);
 
   // Agent interaction
-  const [nearbyZone, setNearbyZone]   = useState<string | null>(null);
-  const nearbyZoneRef                 = useRef<string | null>(null);
+  const [nearbyZone, setNearbyZone] = useState<string | null>(null);
+  const nearbyZoneRef = useRef<string | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
 
   // Habit coach prompt
   const {
-    isLoading:      habitLoading,
+    isLoading: habitLoading,
     analysisResult: habitResult,
-    startAnalysis:  startHabitAnalysis,
+    startAnalysis: startHabitAnalysis,
     setAnalysisResult: setHabitResult,
   } = useHabitCoachPrompt();
 
@@ -163,7 +164,16 @@ export default function DentistOffice() {
     openSunlife,
     closeSunlife,
     startAnalysis: startSunlifeAnalysis,
+    treatmentMonths: sunlifeTreatmentMonths,
+    severity: sunlifeSeverity,
   } = useSunlifePrompt();
+
+  // Clinic locator prompt
+  const {
+    isOpen: clinicOpen,
+    openClinicLocator,
+    closeClinicLocator,
+  } = useClinicLocatorPrompt();
 
   // Viewport size — needed to account for objectFit:contain letterboxing
   const [vp, setVp] = useState({ w: 1920, h: 1080 });
@@ -176,15 +186,15 @@ export default function DentistOffice() {
 
   // Character state
   const keysRef = useRef<Set<string>>(new Set());
-  const posRef  = useRef({ x: SPAWN_X, y: SPAWN_Y });
-  const rafRef  = useRef<number>(0);
+  const posRef = useRef({ x: SPAWN_X, y: SPAWN_Y });
+  const rafRef = useRef<number>(0);
   const [pos, setPos] = useState({ x: SPAWN_X, y: SPAWN_Y });
   const [dir, setDir] = useState<"front" | "back" | "left" | "right">("back");
 
-  const stageRef          = useRef<Stage>(0);
-  stageRef.current        = stage;
-  const advancingRef      = useRef(false);
-  const movementUnlocked  = useRef(false);
+  const stageRef = useRef<Stage>(0);
+  stageRef.current = stage;
+  const advancingRef = useRef(false);
+  const movementUnlocked = useRef(false);
 
   // Pulse is triggered explicitly in handleAnyKey when looping back from stage 9
 
@@ -275,6 +285,8 @@ export default function DentistOffice() {
           setActiveAgent("habit");
         } else if (zone === "financial") {
           openSunlife();
+        } else if (zone === "clinic") {
+          openClinicLocator();
         } else {
           setActiveAgent(zone);
         }
@@ -282,23 +294,23 @@ export default function DentistOffice() {
     };
 
     window.addEventListener("keydown", onDown);
-    window.addEventListener("keyup",   onUp);
+    window.addEventListener("keyup", onUp);
     window.addEventListener("keydown", onSpace);
 
     const loop = () => {
       const keys = keysRef.current;
       let dx = 0, dy = 0;
-      if (keys.has("ArrowLeft"))  dx -= SPEED;
+      if (keys.has("ArrowLeft")) dx -= SPEED;
       if (keys.has("ArrowRight")) dx += SPEED;
-      if (keys.has("ArrowUp"))    dy -= SPEED;
-      if (keys.has("ArrowDown"))  dy += SPEED;
+      if (keys.has("ArrowUp")) dy -= SPEED;
+      if (keys.has("ArrowDown")) dy += SPEED;
 
       let nx = posRef.current.x;
       let ny = posRef.current.y;
 
       if (dx !== 0 || dy !== 0) {
         if (Math.abs(dx) >= Math.abs(dy)) setDir(dx > 0 ? "right" : "left");
-        else                               setDir(dy > 0 ? "front" : "back");
+        else setDir(dy > 0 ? "front" : "back");
 
         nx = Math.max(0, Math.min(WORLD_W - CHAR_W, posRef.current.x + dx));
         ny = Math.max(0, Math.min(WORLD_H - CHAR_H, posRef.current.y + dy));
@@ -326,7 +338,7 @@ export default function DentistOffice() {
 
     return () => {
       window.removeEventListener("keydown", onDown);
-      window.removeEventListener("keyup",   onUp);
+      window.removeEventListener("keyup", onUp);
       window.removeEventListener("keydown", onSpace);
       cancelAnimationFrame(rafRef.current);
     };
@@ -397,23 +409,23 @@ export default function DentistOffice() {
               @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
               @keyframes rpgBlink { 0%,100%{opacity:1} 50%{opacity:0} }
               .rpg-blink { animation: rpgBlink 1s step-end infinite; }
-              @keyframes rpgPulse { 0%,100%{box-shadow:6px 6px 0 #3D2B1F} 50%{box-shadow:6px 6px 0 #C8960C, 0 0 24px #F5C84255} }
+              @keyframes rpgPulse { 0%,100%{box-shadow:6px 6px 0 #1A3A5E} 50%{box-shadow:6px 6px 0 #1B6FAD, 0 0 24px #4AAEE055} }
               .rpg-dropzone { animation: rpgPulse 2s ease-in-out infinite; transition: background 0.1s; }
-              .rpg-dropzone:hover { background: #C8960C22 !important; }
+              .rpg-dropzone:hover { background: #1B6FAD22 !important; }
             `}</style>
             <div style={{
               fontFamily: "'Press Start 2P', monospace",
-              background: "#EAD3A2",
-              border: "6px solid #3D2B1F",
-              boxShadow: "8px 8px 0 #3D2B1F",
+              background: "#C5DCF0",
+              border: "6px solid #1A3A5E",
+              boxShadow: "8px 8px 0 #1A3A5E",
               width: "min(560px, 88vw)",
               overflow: "hidden",
               marginBottom: "80px",
             }}>
               {/* Title bar */}
               <div style={{
-                background: "#D4B896",
-                borderBottom: "5px solid #3D2B1F",
+                background: "#A2C4E0",
+                borderBottom: "5px solid #1A3A5E",
                 padding: "14px 20px",
                 display: "flex",
                 alignItems: "center",
@@ -421,7 +433,7 @@ export default function DentistOffice() {
                 gap: 12,
               }}>
                 <span style={{ fontSize: 16 }}>📷</span>
-                <span style={{ fontSize: 13, color: "#2C1810", letterSpacing: "4px" }}>UPLOAD PHOTO</span>
+                <span style={{ fontSize: 13, color: "#0D1E30", letterSpacing: "4px" }}>UPLOAD PHOTO</span>
               </div>
 
               {/* Drop zone — the whole thing is the click target */}
@@ -433,8 +445,8 @@ export default function DentistOffice() {
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                   margin: "20px",
                   padding: "40px 24px",
-                  border: "5px dashed #3D2B1F",
-                  background: "#D4B896",
+                  border: "5px dashed #1A3A5E",
+                  background: "#A2C4E0",
                   cursor: "pointer",
                   gap: 20,
                 }}
@@ -442,19 +454,18 @@ export default function DentistOffice() {
                 {/* Upload arrow icon */}
                 <div style={{ fontSize: 56, lineHeight: 1 }}>⬆</div>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 12, color: "#2C1810", letterSpacing: "2px", lineHeight: "2.4", margin: 0 }}>
+                  <p style={{ fontSize: 12, color: "#0D1E30", letterSpacing: "2px", lineHeight: "2.4", margin: 0 }}>
                     CLICK HERE TO UPLOAD<br/>YOUR TEETH PHOTO
                   </p>
                 </div>
                 <div style={{
-                  background: "#C8960C",
-                  border: "4px solid #3D2B1F",
-                  boxShadow: "4px 4px 0 #3D2B1F",
+                  background: "#1B6FAD",
+                  border: "4px solid #1A3A5E",
+                  boxShadow: "4px 4px 0 #1A3A5E",
                   padding: "12px 28px",
                 }}>
-                  <span style={{ fontSize: 11, color: "#140904", letterSpacing: "2px" }}>▶ SELECT FILE</span>
+                  <span style={{ fontSize: 11, color: "#C5DCF0", letterSpacing: "2px" }}>▶ SELECT FILE</span>
                 </div>
-                <span style={{ fontSize: 8, color: "#7A5C3A", letterSpacing: "1px" }}>OR DRAG &amp; DROP · JPEG / PNG</span>
                 <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileInput} />
               </label>
 
@@ -462,12 +473,12 @@ export default function DentistOffice() {
               <div style={{
                 margin: "0 20px 20px",
                 padding: "14px 16px",
-                background: "#D4B896",
-                border: "4px solid #3D2B1F",
+                background: "#A2C4E0",
+                border: "4px solid #1A3A5E",
                 display: "flex", gap: 14, alignItems: "center",
               }}>
                 <span style={{ fontSize: 28, flexShrink: 0 }}>🦷</span>
-                <p style={{ fontSize: 9, color: "#2C1810", lineHeight: "2.4", margin: 0 }}>
+                <p style={{ fontSize: 9, color: "#0D1E30", lineHeight: "2.4", margin: 0 }}>
                   &ldquo;Show me your best smile for the camera!&rdquo;
                   <span className="rpg-blink" style={{ marginLeft: 4 }}>▌</span>
                 </p>
@@ -515,20 +526,20 @@ export default function DentistOffice() {
   }
 
   // ── Stages 4-9 — game world ──────────────────────────────────────────────
-  const bgImage     = STAGE_IMAGES[stage] ?? "/Analyze_teeth.png";
-  const showChar    = movementUnlocked.current;
+  const bgImage = STAGE_IMAGES[stage] ?? "/Analyze_teeth.png";
+  const showChar = movementUnlocked.current;
   const isZoomedOut = stage >= 6;
 
   // Compute actual image rect accounting for objectFit:contain letterboxing
-  const imgScale  = Math.min(vp.w / WORLD_W, vp.h / WORLD_H);
-  const imgW      = WORLD_W * imgScale;
-  const imgH      = WORLD_H * imgScale;
-  const imgLeft   = (vp.w - imgW) / 2;
-  const imgTop    = (vp.h - imgH) / 2;
+  const imgScale = Math.min(vp.w / WORLD_W, vp.h / WORLD_H);
+  const imgW = WORLD_W * imgScale;
+  const imgH = WORLD_H * imgScale;
+  const imgLeft = (vp.w - imgW) / 2;
+  const imgTop = (vp.h - imgH) / 2;
   // Character position in absolute screen pixels
-  const charPx    = imgLeft + pos.x * imgScale;
-  const charPy    = imgTop  + pos.y * imgScale;
-  const charPw    = CHAR_W  * imgScale;
+  const charPx = imgLeft + pos.x * imgScale;
+  const charPy = imgTop + pos.y * imgScale;
+  const charPw = CHAR_W * imgScale;
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black select-none relative">
@@ -613,8 +624,8 @@ export default function DentistOffice() {
       {/* ── Agent activation circles ─────────────────────────────────────── */}
       {showChar && AGENT_ZONES.map((az) => {
         const cx = imgLeft + az.wx * imgScale;
-        const cy = imgTop  + az.wy * imgScale;
-        const r  = az.r * imgScale;
+        const cy = imgTop + az.wy * imgScale;
+        const r = az.r * imgScale;
         const isNear = nearbyZone === az.id;
 
         return (
@@ -623,8 +634,8 @@ export default function DentistOffice() {
             style={{
               position: "absolute",
               left: cx - r,
-              top:  cy - r,
-              width:  r * 2,
+              top: cy - r,
+              width: r * 2,
               height: r * 2,
               borderRadius: "50%",
               border: isNear
@@ -677,8 +688,8 @@ export default function DentistOffice() {
           style={{
             position: "absolute",
             left: charPx,
-            top:  charPy,
-            width:  charPw,
+            top: charPy,
+            width: charPw,
             height: CHAR_H * imgScale,
             imageRendering: "auto",
             zIndex: 10,
@@ -734,7 +745,7 @@ export default function DentistOffice() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ message: `Your habit coaching session is complete. Time to brush! 🦷${medLine}` }),
-            }).catch(() => {});
+            }).catch(() => { });
           }
         }}
         isLoading={habitLoading}
@@ -769,10 +780,17 @@ export default function DentistOffice() {
         analysisResult={sunlifeResult}
         sourceUrl={sunlifeSourceUrl}
         isLoading={sunlifeLoading}
+        treatmentMonths={sunlifeTreatmentMonths}
+        severity={sunlifeSeverity}
       />
 
-      {/* Generic agent modal (clinic) */}
-      {activeAgent === "clinic" && (
+      {/* Clinic locator prompt */}
+      <ClinicLocatorPrompt isOpen={clinicOpen} onClose={closeClinicLocator}>
+        <ChatPage />
+      </ClinicLocatorPrompt>
+
+      {/* Generic agent modal (fallback) */}
+      {activeAgent && activeAgent !== "clinic" && activeAgent !== "habit" && (
         <AgentModal agentId={activeAgent} onClose={() => setActiveAgent(null)} />
       )}
     </div>

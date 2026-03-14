@@ -2,6 +2,18 @@
 
 import { useEffect, useCallback, useState } from "react";
 
+/* ─── Style constants ─── */
+const FONT = "'Press Start 2P', monospace";
+
+const C = {
+    bg:     "#C8DCC0",
+    bgDark: "#A8C0A0",
+    border: "#4A6B4A",
+    text:   "#2A3D2A",
+    muted:  "#5A7A5A",
+    active: "#3D5A3D",
+};
+
 /* ─── Types ─── */
 type CoachStep = "greeting" | "medication" | "analyzing" | "results";
 
@@ -17,26 +29,22 @@ const MEDICATIONS = [
 interface HabitCoachPromptProps {
     isOpen: boolean;
     onClose: (medications: string[]) => void;
-    /** Called when user completes the checklist — pass in your image data or URL */
     onAnalyze?: (medications: string[]) => void;
-    /** Pass Gemini analysis results here when ready */
     analysisResult?: string | null;
-    /** Set true while waiting for Gemini response */
     isLoading?: boolean;
 }
 
-/* ─── Bouncing Dots Animation ─── */
+/* ─── Bouncing Dots ─── */
 function PixelDots() {
     return (
         <div className="flex items-center justify-center gap-2 py-4">
             {[0, 1, 2].map((i) => (
                 <span
                     key={i}
-                    className="inline-block rounded-sm"
+                    className="inline-block"
                     style={{
-                        width: "10px",
-                        height: "10px",
-                        backgroundColor: "#5A7A5A",
+                        width: "10px", height: "10px",
+                        backgroundColor: C.muted,
                         animation: `pixelBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
                     }}
                 />
@@ -45,23 +53,29 @@ function PixelDots() {
     );
 }
 
-/* ─── Tooth Icon (pixel style) ─── */
-function ToothIcon() {
+/* ─── Shared button style ─── */
+function PanelButton({ onClick, children, fullWidth = true }: {
+    onClick: () => void;
+    children: React.ReactNode;
+    fullWidth?: boolean;
+}) {
     return (
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <path
-                d="M10 8C10 4 14 2 18 2C22 2 26 4 26 8C26 14 28 18 26 24C24 30 22 34 20 34C18 34 18 28 18 28C18 28 18 34 16 34C14 34 12 30 10 24C8 18 10 14 10 8Z"
-                fill="#E8F0E8"
-                stroke="#5A7A5A"
-                strokeWidth="2"
-            />
-            <path
-                d="M14 10C14 10 18 12 22 10"
-                stroke="#5A7A5A"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-            />
-        </svg>
+        <button
+            onClick={onClick}
+            className={`${fullWidth ? "w-full" : "flex-1"} transition-all duration-150 hover:brightness-95 active:translate-y-[1px]`}
+            style={{
+                backgroundColor: C.bg,
+                border: `3px solid ${C.border}`,
+                padding: "12px 0",
+                fontFamily: FONT,
+                fontSize: "11px",
+                color: C.text,
+                cursor: "pointer",
+                boxShadow: `0 3px 0 ${C.active}, inset 0 1px 0 rgba(255,255,255,0.25)`,
+            }}
+        >
+            {children}
+        </button>
     );
 }
 
@@ -77,7 +91,6 @@ export function HabitCoachPrompt({
     const [step, setStep] = useState<CoachStep>("greeting");
     const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
 
-    // Animate in
     useEffect(() => {
         if (isOpen) {
             setStep("greeting");
@@ -88,28 +101,18 @@ export function HabitCoachPrompt({
         setIsVisible(false);
     }, [isOpen]);
 
-    // Move to results when analysis arrives
     useEffect(() => {
-        if (analysisResult && (step === "analyzing" || step === "medication")) {
-            setStep("results");
-        }
+        if (analysisResult && (step === "analyzing" || step === "medication")) setStep("results");
     }, [analysisResult, step]);
 
-    // Sync external loading state
     useEffect(() => {
-        if (isLoading && (step === "greeting" || step === "medication")) {
-            setStep("analyzing");
-        }
+        if (isLoading && (step === "greeting" || step === "medication")) setStep("analyzing");
     }, [isLoading, step]);
 
-    // ESC to close
     const handleKeyDown = useCallback(
-        (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose(selectedMedications);
-        },
-        [onClose],
+        (e: KeyboardEvent) => { if (e.key === "Escape") onClose(selectedMedications); },
+        [onClose, selectedMedications],
     );
-
     useEffect(() => {
         if (isOpen) {
             window.addEventListener("keydown", handleKeyDown);
@@ -117,401 +120,183 @@ export function HabitCoachPrompt({
         }
     }, [isOpen, handleKeyDown]);
 
-    const toggleMedication = (med: string) => {
+    const toggleMedication = (med: string) =>
         setSelectedMedications((prev) =>
             prev.includes(med) ? prev.filter((m) => m !== med) : [...prev, med],
         );
-    };
-
-    const handleStartChecklist = () => {
-        setStep("medication");
-    };
-
-    const handleFinishChecklist = () => {
-        setStep("analyzing");
-        onAnalyze?.(selectedMedications);
-    };
 
     if (!isOpen) return null;
 
     return (
         <>
-            {/* Keyframes for bouncing dots */}
             <style jsx global>{`
-        @keyframes pixelBounce {
-          0%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-12px); }
-        }
-        @keyframes pixelPulse {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @keyframes pixelBounce   { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-12px)} }
+        @keyframes pixelPulse    { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes blink         { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes progressSlide { 0%{transform:translateX(-100%)} 70%{transform:translateX(260%)} 100%{transform:translateX(260%)} }
+        .habit-blink { animation: blink 1s step-end infinite; }
+        .habit-scroll::-webkit-scrollbar { width: 10px; }
+        .habit-scroll::-webkit-scrollbar-track { background: ${C.bgDark}; border-left: 3px solid ${C.border}; }
+        .habit-scroll::-webkit-scrollbar-thumb { background: ${C.muted}; border: 2px solid ${C.border}; }
       `}</style>
 
             <div
-                className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
-                    }`}
-                style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+                className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                style={{ backgroundColor: "rgba(0,0,0,0.75)" }}
                 onClick={() => onClose(selectedMedications)}
             >
-                {/* ── Outer wrapper ── */}
                 <div
                     onClick={(e) => e.stopPropagation()}
-                    className={`relative transform transition-all duration-300 ease-out ${isVisible ? "scale-100 translate-y-0" : "scale-95 translate-y-3"
-                        }`}
+                    className={`relative transform transition-all duration-300 ease-out ${isVisible ? "scale-100 translate-y-0" : "scale-95 translate-y-3"}`}
                 >
-                    {/* Pixel shadow */}
-                    <div
-                        className="absolute inset-0 translate-x-1 translate-y-1"
-                        style={{ backgroundColor: "#3D5A3D", borderRadius: "6px" }}
-                    />
+                    {/* Panel */}
+                    <div style={{
+                        width: "480px",
+                        maxWidth: "94vw",
+                        background: C.bg,
+                        border: `4px solid ${C.border}`,
+                        boxShadow: `8px 8px 0 ${C.border}`,
+                        overflow: "hidden",
+                    }}>
+                        {/* Header bar */}
+                        <div style={{
+                            background: C.bgDark,
+                            borderBottom: `4px solid ${C.border}`,
+                            padding: "14px 20px",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
+                        }}>
+                            <span style={{ fontSize: 24 }}>🪥</span>
+                            <span style={{ fontFamily: FONT, fontSize: "12px", color: C.text, letterSpacing: "2px" }}>
+                                [ HABIT COACH ]
+                            </span>
+                        </div>
 
-                    {/* Main panel */}
-                    <div
-                        className="relative"
-                        style={{
-                            width: "440px",
-                            maxWidth: "92vw",
-                            backgroundColor: "#A8C0A0",
-                            border: "4px solid #4A6B4A",
-                            borderRadius: "6px",
-                            boxShadow: "inset 0 0 0 2px #B8D0B0, inset 0 0 0 4px #98B090",
-                        }}
-                    >
                         {/* Close button */}
                         <button
                             onClick={() => onClose(selectedMedications)}
-                            className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center transition-transform hover:scale-110 active:scale-95"
+                            className="absolute -right-3 -top-3 z-10 flex h-10 w-10 items-center justify-center transition-transform hover:scale-110 active:scale-95"
                             style={{
-                                backgroundColor: "#7A9A72",
-                                border: "3px solid #4A6B4A",
-                                borderRadius: "4px",
-                                boxShadow: "1px 2px 0 #3D5A3D",
-                                color: "#2A3D2A",
+                                backgroundColor: C.bg,
+                                border: `4px solid ${C.border}`,
+                                boxShadow: `3px 3px 0 ${C.border}`,
+                                color: C.text,
                                 fontWeight: 900,
-                                fontSize: "16px",
+                                fontSize: "18px",
                                 fontFamily: "monospace",
                                 lineHeight: 1,
+                                cursor: "pointer",
                             }}
                             aria-label="Close"
                         >
                             ✕
                         </button>
 
-                        {/* Inner content */}
-                        <div className="px-7 pb-7 pt-6">
-                            {/* Tooth icon */}
-                            <div className="mb-1 flex justify-center">
-                                <ToothIcon />
-                            </div>
+                        {/* Scrollable content */}
+                        <div className="habit-scroll" style={{
+                            padding: "20px",
+                            background: C.bgDark,
+                            maxHeight: "70vh",
+                            overflowY: "auto",
+                            borderBottom: `2px solid ${C.border}`,
+                        }}>
+                            <div style={{
+                                background: C.bg,
+                                border: `3px solid ${C.border}`,
+                                padding: "20px 18px",
+                            }}>
 
-                            {/* Title */}
-                            <h2
-                                className="mb-5 text-center"
-                                style={{
-                                    fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                    fontSize: "12px",
-                                    letterSpacing: "2px",
-                                    color: "#2A3D2A",
-                                    textShadow: "1px 1px 0 rgba(255,255,255,0.15)",
-                                }}
-                            >
-                                HABIT COACH
-                            </h2>
-
-                            {/* ── Step: Greeting ── */}
-                            {step === "greeting" && (
-                                <>
-                                    <div
-                                        className="mb-6"
-                                        style={{
-                                            backgroundColor: "#C8DCC0",
-                                            border: "3px solid #6B8B6B",
-                                            borderRadius: "4px",
-                                            padding: "16px 18px",
-                                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
-                                        }}
-                                    >
-                                        <p
-                                            style={{
-                                                fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                                fontSize: "10px",
-                                                lineHeight: "22px",
-                                                color: "#2A3D2A",
-                                            }}
-                                        >
+                                {/* ── Greeting ── */}
+                                {step === "greeting" && (
+                                    <>
+                                        <p style={{ fontFamily: FONT, fontSize: "10px", lineHeight: "22px", color: C.text, marginBottom: "12px" }}>
                                             Hey there! I&apos;m your Habit Coach! 🦷
                                         </p>
-                                        <p
-                                            className="mt-3"
-                                            style={{
-                                                fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                                fontSize: "10px",
-                                                lineHeight: "22px",
-                                                color: "#3D5A3D",
-                                            }}
-                                        >
-                                            Let&apos;s see what we can do to improve your smile based
-                                            on your dental scan!
+                                        <p style={{ fontFamily: FONT, fontSize: "10px", lineHeight: "22px", color: C.muted, marginBottom: "20px" }}>
+                                            Let&apos;s see what we can do to improve your smile based on your dental scan!
                                         </p>
-                                    </div>
+                                        <div className="flex gap-4">
+                                            <PanelButton onClick={() => setStep("medication")} fullWidth={false}>LET&apos;S GO!</PanelButton>
+                                            <PanelButton onClick={() => onClose(selectedMedications)} fullWidth={false}>NOT NOW</PanelButton>
+                                        </div>
+                                    </>
+                                )}
 
-                                    <div className="flex gap-4">
-                                        <button
-                                            onClick={handleStartChecklist}
-                                            className="flex-1 transition-all duration-150 hover:brightness-95 active:translate-y-[1px]"
-                                            style={{
-                                                backgroundColor: "#C8DCC0",
-                                                border: "3px solid #6B8B6B",
-                                                borderRadius: "4px",
-                                                padding: "12px 0",
-                                                fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                                fontSize: "11px",
-                                                color: "#2A3D2A",
-                                                cursor: "pointer",
-                                                boxShadow:
-                                                    "0 3px 0 #3D5A3D, inset 0 1px 0 rgba(255,255,255,0.25)",
-                                            }}
-                                        >
-                                            LET&apos;S GO!
-                                        </button>
-                                        <button
-                                            onClick={() => onClose(selectedMedications)}
-                                            className="flex-1 transition-all duration-150 hover:brightness-95 active:translate-y-[1px]"
-                                            style={{
-                                                backgroundColor: "#C8DCC0",
-                                                border: "3px solid #6B8B6B",
-                                                borderRadius: "4px",
-                                                padding: "12px 0",
-                                                fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                                fontSize: "11px",
-                                                color: "#2A3D2A",
-                                                cursor: "pointer",
-                                                boxShadow:
-                                                    "0 3px 0 #3D5A3D, inset 0 1px 0 rgba(255,255,255,0.25)",
-                                            }}
-                                        >
-                                            NOT NOW
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-
-                            {/* ── Step: Medication Checklist ── */}
-                            {step === "medication" && (
-                                <>
-                                    <p
-                                        className="mb-4 text-center"
-                                        style={{
-                                            fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                            fontSize: "9px",
-                                            lineHeight: "18px",
-                                            color: "#2A3D2A",
-                                        }}
-                                    >
-                                        Do you take any of these medications?
-                                    </p>
-
-                                    <div
-                                        className="mb-6 space-y-3"
-                                        style={{
-                                            backgroundColor: "#C8DCC0",
-                                            border: "3px solid #6B8B6B",
-                                            borderRadius: "4px",
-                                            padding: "16px 14px",
-                                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
-                                            maxHeight: "260px",
-                                            overflowY: "auto",
-                                        }}
-                                    >
-                                        {MEDICATIONS.map((med) => (
-                                            <label
-                                                key={med}
-                                                className="flex cursor-pointer items-start gap-4 transition-colors hover:bg-white/10"
-                                                onClick={() => toggleMedication(med)}
-                                            >
-                                                {/* Custom Pixel Checkbox */}
-                                                <div
-                                                    className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center"
-                                                    style={{
-                                                        backgroundColor: selectedMedications.includes(med)
-                                                            ? "#5A7A5A"
-                                                            : "#E8F0E8",
-                                                        border: "2px solid #4A6B4A",
-                                                        borderRadius: "2px",
-                                                        boxShadow: "1px 1px 0 rgba(0,0,0,0.1)",
-                                                    }}
+                                {/* ── Medication checklist ── */}
+                                {step === "medication" && (
+                                    <>
+                                        <p style={{ fontFamily: FONT, fontSize: "9px", lineHeight: "20px", color: C.text, textAlign: "center", marginBottom: "16px" }}>
+                                            Do you take any of these medications?
+                                        </p>
+                                        <div className="habit-scroll space-y-3" style={{
+                                            maxHeight: "260px", overflowY: "auto", marginBottom: "16px",
+                                        }}>
+                                            {MEDICATIONS.map((med) => (
+                                                <label
+                                                    key={med}
+                                                    className="flex cursor-pointer items-start gap-4 transition-colors hover:bg-white/10"
+                                                    onClick={() => toggleMedication(med)}
                                                 >
-                                                    {selectedMedications.includes(med) && (
-                                                        <span
-                                                            style={{
-                                                                color: "white",
-                                                                fontSize: "10px",
-                                                                fontWeight: "bold",
-                                                            }}
-                                                        >
-                                                            ✓
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <span
-                                                    style={{
-                                                        fontFamily:
-                                                            "'Press Start 2P', 'Courier New', monospace",
-                                                        fontSize: "8px",
-                                                        lineHeight: "16px",
-                                                        color: "#2A3D2A",
-                                                        userSelect: "none",
-                                                    }}
-                                                >
-                                                    {med}
-                                                </span>
-                                            </label>
-                                        ))}
-                                    </div>
+                                                    <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center" style={{
+                                                        backgroundColor: selectedMedications.includes(med) ? C.muted : "#E8F0E8",
+                                                        border: `2px solid ${C.border}`,
+                                                    }}>
+                                                        {selectedMedications.includes(med) && (
+                                                            <span style={{ color: "white", fontSize: "10px", fontWeight: "bold" }}>✓</span>
+                                                        )}
+                                                    </div>
+                                                    <span style={{ fontFamily: FONT, fontSize: "8px", lineHeight: "16px", color: C.text, userSelect: "none" }}>
+                                                        {med}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <PanelButton onClick={() => { setStep("analyzing"); onAnalyze?.(selectedMedications); }}>
+                                            DONE
+                                        </PanelButton>
+                                    </>
+                                )}
 
-                                    <button
-                                        onClick={handleFinishChecklist}
-                                        className="w-full transition-all duration-150 hover:brightness-95 active:translate-y-[1px]"
-                                        style={{
-                                            backgroundColor: "#C8DCC0",
-                                            border: "3px solid #6B8B6B",
-                                            borderRadius: "4px",
-                                            padding: "12px 0",
-                                            fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                            fontSize: "11px",
-                                            color: "#2A3D2A",
-                                            cursor: "pointer",
-                                            boxShadow:
-                                                "0 3px 0 #3D5A3D, inset 0 1px 0 rgba(255,255,255,0.25)",
-                                        }}
-                                    >
-                                        DONE
-                                    </button>
-                                </>
-                            )}
+                                {/* ── Analyzing ── */}
+                                {step === "analyzing" && (
+                                    <>
+                                        <p style={{ fontFamily: FONT, fontSize: "10px", lineHeight: "22px", color: C.text, textAlign: "center" }}>
+                                            Analyzing your smile...
+                                        </p>
+                                        <PixelDots />
+                                        <p style={{ fontFamily: FONT, fontSize: "8px", lineHeight: "18px", color: C.muted, textAlign: "center", animation: "pixelPulse 2s ease-in-out infinite" }}>
+                                            Checking dental habits...
+                                        </p>
+                                        <div className="mx-auto mt-4" style={{ width: "80%", height: "10px", backgroundColor: C.bgDark, border: `2px solid ${C.border}`, overflow: "hidden" }}>
+                                            <div style={{ height: "100%", backgroundColor: C.active, animation: "progressSlide 2.4s linear infinite", width: "40%" }} />
+                                        </div>
+                                    </>
+                                )}
 
-                            {/* ── Step: Analyzing ── */}
-                            {step === "analyzing" && (
-                                <div
-                                    style={{
-                                        backgroundColor: "#C8DCC0",
-                                        border: "3px solid #6B8B6B",
-                                        borderRadius: "4px",
-                                        padding: "24px 18px",
-                                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
-                                    }}
-                                >
-                                    <p
-                                        className="text-center"
-                                        style={{
-                                            fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                            fontSize: "10px",
-                                            lineHeight: "22px",
-                                            color: "#2A3D2A",
-                                        }}
-                                    >
-                                        Analyzing your smile...
-                                    </p>
-
-                                    <PixelDots />
-
-                                    <p
-                                        className="text-center"
-                                        style={{
-                                            fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                            fontSize: "8px",
-                                            lineHeight: "18px",
-                                            color: "#5A7A5A",
-                                            animation: "pixelPulse 2s ease-in-out infinite",
-                                        }}
-                                    >
-                                        Checking dental habits...
-                                    </p>
-
-                                    {/* Progress bar */}
-                                    <div
-                                        className="mx-auto mt-4"
-                                        style={{
-                                            width: "80%",
-                                            height: "10px",
-                                            backgroundColor: "#98B090",
-                                            border: "2px solid #6B8B6B",
-                                            borderRadius: "2px",
-                                            overflow: "hidden",
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                height: "100%",
-                                                backgroundColor: "#4A6B4A",
-                                                animation: "progressSlide 3s ease-in-out infinite",
-                                                width: "60%",
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ── Step: Results ── */}
-                            {step === "results" && analysisResult && (
-                                <>
-                                    <div
-                                        className="mb-6"
-                                        style={{
-                                            backgroundColor: "#C8DCC0",
-                                            border: "3px solid #6B8B6B",
-                                            borderRadius: "4px",
-                                            padding: "16px 18px",
-                                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
-                                            maxHeight: "280px",
-                                            overflowY: "auto",
-                                        }}
-                                    >
-                                        <p
-                                            className="mb-3"
-                                            style={{
-                                                fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                                fontSize: "10px",
-                                                lineHeight: "20px",
-                                                color: "#2A3D2A",
-                                            }}
-                                        >
+                                {/* ── Results ── */}
+                                {step === "results" && analysisResult && (
+                                    <>
+                                        <p style={{ fontFamily: FONT, fontSize: "10px", lineHeight: "20px", color: C.text, marginBottom: "12px" }}>
                                             Here&apos;s what I found:
                                         </p>
-                                        <div
-                                            style={{
-                                                fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                                fontSize: "9px",
-                                                lineHeight: "20px",
-                                                color: "#3D5A3D",
-                                                whiteSpace: "pre-wrap",
-                                            }}
-                                        >
+                                        <div className="habit-scroll" style={{ fontFamily: FONT, fontSize: "9px", lineHeight: "20px", color: C.muted, whiteSpace: "pre-wrap", maxHeight: "240px", overflowY: "auto", marginBottom: "16px" }}>
                                             {analysisResult}
                                         </div>
-                                    </div>
+                                        <PanelButton onClick={() => onClose(selectedMedications)}>GOT IT!</PanelButton>
+                                    </>
+                                )}
 
-                                    <button
-                                        onClick={() => onClose(selectedMedications)}
-                                        className="w-full transition-all duration-150 hover:brightness-95 active:translate-y-[1px]"
-                                        style={{
-                                            backgroundColor: "#C8DCC0",
-                                            border: "3px solid #6B8B6B",
-                                            borderRadius: "4px",
-                                            padding: "12px 0",
-                                            fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                            fontSize: "11px",
-                                            color: "#2A3D2A",
-                                            cursor: "pointer",
-                                            boxShadow:
-                                                "0 3px 0 #3D5A3D, inset 0 1px 0 rgba(255,255,255,0.25)",
-                                        }}
-                                    >
-                                        GOT IT!
-                                    </button>
-                                </>
-                            )}
+                            </div>
+                        </div>
+
+                        {/* Footer bar */}
+                        <div style={{
+                            padding: "10px 16px",
+                            background: C.bgDark,
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                        }}>
+                            <span style={{ fontFamily: FONT, fontSize: "7px", color: C.muted }}>V1.0.0-BETA</span>
+                            <span className="habit-blink" style={{ fontFamily: FONT, fontSize: "7px", color: C.active }}>SYSTEM ACTIVE</span>
                         </div>
                     </div>
                 </div>
@@ -526,45 +311,19 @@ export function useHabitCoachPrompt() {
     const [analysisResult, setAnalysisResult] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const openHabitCoach = useCallback(() => {
-        setAnalysisResult(null);
-        setIsLoading(false);
-        setIsOpen(true);
-    }, []);
-
+    const openHabitCoach  = useCallback(() => { setAnalysisResult(null); setIsLoading(false); setIsOpen(true); }, []);
     const closeHabitCoach = useCallback(() => setIsOpen(false), []);
 
-    /**
-     * Call this to trigger Gemini analysis.
-     * Pass your async analysis function — the hook manages loading state.
-     *
-     * Example:
-     * ```ts
-     * startAnalysis(async () => {
-     *   const res = await fetch("/api/analyze", { method: "POST", body: imageData });
-     *   return (await res.json()).result;
-     * });
-     * ```
-     */
     const startAnalysis = useCallback(async (analysisFn: () => Promise<string>) => {
         setIsLoading(true);
         try {
-            const result = await analysisFn();
-            setAnalysisResult(result);
-        } catch (err) {
+            setAnalysisResult(await analysisFn());
+        } catch {
             setAnalysisResult("⚠ Analysis failed. Please try again later.");
         } finally {
             setIsLoading(false);
         }
     }, []);
 
-    return {
-        isOpen,
-        isLoading,
-        analysisResult,
-        openHabitCoach,
-        closeHabitCoach,
-        startAnalysis,
-        setAnalysisResult,
-    };
+    return { isOpen, isLoading, analysisResult, openHabitCoach, closeHabitCoach, startAnalysis, setAnalysisResult };
 }
