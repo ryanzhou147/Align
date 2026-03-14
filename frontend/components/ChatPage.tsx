@@ -24,9 +24,9 @@ function groupByDay(slots: { start: string; end: string }[] = []) {
 export default function ChatPage() {
   const { data: session, status } = useSession();
   const { location, loading: locLoading } = useGeolocation();
-  const googleToken  = (session as { access_token?: string } | null)?.access_token ?? "";
+  const googleToken = (session as { access_token?: string } | null)?.access_token ?? "";
   const refreshToken = (session as { refresh_token?: string } | null)?.refresh_token;
-  const tokenError   = (session as { error?: string } | null)?.error;
+  const tokenError = (session as { error?: string } | null)?.error;
 
   const {
     step, clinics, selectedClinic, slots, bookedEvent,
@@ -38,61 +38,109 @@ export default function ChatPage() {
 
   if (tokenError === "RefreshAccessTokenError") {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center max-w-sm px-6">
-          <div className="text-5xl mb-4">🔑</div>
-          <h2 className="text-xl font-semibold text-ink mb-2">Session expired</h2>
-          <p className="text-ink/60 text-sm mb-6">Please sign in again to continue.</p>
-          <button onClick={() => signIn("google")} className="bg-ink text-white font-medium px-6 py-3 rounded-xl hover:bg-ink/80 transition-colors">
-            Sign in with Google
-          </button>
-        </div>
+      <div className="p-8 text-center space-y-6">
+        <div className="text-5xl animate-pulse">🔑</div>
+        <h2 style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace", fontSize: "14px", color: "#1A2B5A" }}>
+          SESSION EXPIRED
+        </h2>
+        <p style={{ fontFamily: "monospace", fontSize: "12px", color: "#1A2B5A", opacity: 0.7 }}>
+          Please sign in again to continue.
+        </p>
+        <button
+          onClick={() => signIn("google")}
+          style={{
+            backgroundColor: "#8DA5D1",
+            border: "4px solid #2D3E75",
+            borderRadius: "4px",
+            padding: "16px 24px",
+            fontFamily: "'Press Start 2P', 'Courier New', monospace",
+            fontSize: "10px",
+            color: "#1A2B5A",
+            cursor: "pointer",
+            boxShadow: "0 4px 0 #2D3E75, inset 0 1px 0 rgba(255,255,255,0.3)",
+          }}
+          className="transition-all hover:scale-105 active:translate-y-[2px] active:shadow-none"
+        >
+          SIGN IN WITH GOOGLE
+        </button>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center max-w-sm px-6">
-          <div className="text-5xl mb-4">🦷</div>
-          <h2 className="text-2xl font-semibold text-ink mb-2">Find a dental clinic</h2>
-          <p className="text-ink/60 text-sm mb-6">Sign in with Google to check your calendar and book an appointment.</p>
-          <button
-            onClick={() => signIn("google")}
-            className="bg-ink text-white font-medium px-6 py-3 rounded-xl hover:bg-ink/80 transition-colors"
-          >
-            Sign in with Google
-          </button>
-        </div>
+      <div
+        className="p-8 text-center space-y-6"
+        style={{
+          backgroundColor: "#B8C6E6",
+          border: "4px solid #2D3E75",
+          borderRadius: "4px",
+          boxShadow: "inset 0 0 0 2px #E1E8F5, inset 0 0 0 4px #8DA5D1",
+        }}
+      >
+        <div className="text-5xl animate-bounce">🦷</div>
+        <h2 style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace", fontSize: "12px", color: "#1A2B5A", textShadow: "1px 1px 0 rgba(255,255,255,0.5)" }}>
+          FIND A CLINIC
+        </h2>
+        <p style={{ fontFamily: "monospace", fontSize: "11px", color: "#1A2B5A", opacity: 0.8, lineHeight: "1.6", fontWeight: "bold" }}>
+          Connect your Google account <br /> to check availability <br /> and book instantly.
+        </p>
+        <button
+          onClick={() => signIn("google")}
+          style={{
+            backgroundColor: "#8DA5D1",
+            border: "4px solid #2D3E75",
+            borderRadius: "4px",
+            padding: "16px 24px",
+            fontFamily: "'Press Start 2P', 'Courier New', monospace",
+            fontSize: "10px",
+            color: "#1A2B5A",
+            cursor: "pointer",
+            boxShadow: "0 4px 0 #2D3E75, inset 0 1px 0 rgba(255,255,255,0.3)",
+          }}
+          className="transition-all hover:scale-105 active:translate-y-[2px] active:shadow-none"
+        >
+          SIGN IN WITH GOOGLE
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream text-ink">
-      <header className="border-b border-ink/10 bg-white px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold">Clinic Locator</h1>
-          <p className="text-xs text-ink/50">
-            {locLoading ? "Detecting location…" : location ? `${location.lat.toFixed(3)}, ${location.lng.toFixed(3)} (${location.source})` : "Location unavailable"}
-          </p>
-        </div>
-        <span className="text-sm text-ink/60">{session.user?.name}</span>
-      </header>
-
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div className="text-[#1A2B5A]">
+      <main className="p-4 space-y-6">
 
         {/* Step 1 — Find clinics */}
         {step === "find_clinics" && (
-          <div className="bg-white rounded-2xl border border-ink/10 p-6 shadow-soft text-center">
-            <p className="text-ink/60 text-sm mb-4">We&apos;ll search for dental clinics near your current location.</p>
+          <div
+            className="text-center p-6"
+            style={{
+              backgroundColor: "#E1E8F5",
+              border: "3px solid #6D87C1",
+              borderRadius: "4px",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3)",
+            }}
+          >
+            <p className="font-['Press_Start_2P'] text-[8px] leading-relaxed mb-6 opacity-70">
+              We'll search for dental clinics near your current location.
+            </p>
             <button
               onClick={findClinics}
               disabled={loading || !location}
-              className="bg-ink text-white px-6 py-3 rounded-xl font-medium hover:bg-ink/80 disabled:opacity-40 transition-colors"
+              style={{
+                backgroundColor: "#8DA5D1",
+                border: "3px solid #2D3E75",
+                borderRadius: "4px",
+                padding: "12px 20px",
+                fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                fontSize: "10px",
+                color: "#1A2B5A",
+                cursor: "pointer",
+                boxShadow: "0 3px 0 #2D3E75, inset 0 1px 0 rgba(255,255,255,0.3)",
+              }}
+              className="transition-all active:translate-y-[2px] active:shadow-none disabled:opacity-40"
             >
-              {loading ? "Searching…" : "Find nearby clinics"}
+              {loading ? "SEARCHING..." : "FIND NEARBY CLINICS"}
             </button>
           </div>
         )}
@@ -100,48 +148,121 @@ export default function ChatPage() {
         {/* Step 2 — Pick a clinic */}
         {step === "select_clinic" && (
           <div className="space-y-3">
-            <h2 className="font-semibold text-lg">Nearby clinics</h2>
+            <h2
+              className="mb-4"
+              style={{
+                fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                fontSize: "10px",
+                color: "#1A2B5A",
+              }}
+            >
+              NEARBY CLINICS
+            </h2>
             {clinics.map((clinic) => (
               <button
                 key={clinic.place_id}
                 onClick={() => getSlots(clinic)}
                 disabled={loading}
-                className="w-full text-left bg-white border border-ink/10 rounded-2xl p-4 shadow-soft hover:border-ink/30 transition-colors disabled:opacity-40"
+                className="w-full text-left transition-all active:translate-y-[1px] disabled:opacity-40"
+                style={{
+                  backgroundColor: "#E1E8F5",
+                  border: "3px solid #6D87C1",
+                  borderRadius: "4px",
+                  padding: "12px 14px",
+                  boxShadow: "0 2px 0 #2D3E75, inset 0 1px 0 rgba(255,255,255,0.3)",
+                }}
               >
                 <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{clinic.name}</p>
-                    <p className="text-sm text-ink/50 mt-0.5">{clinic.address}</p>
+                  <div className="flex-1 mr-2">
+                    <p
+                      className="font-bold mb-1"
+                      style={{
+                        fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                        fontSize: "8px",
+                        lineHeight: "14px",
+                      }}
+                    >
+                      {clinic.name}
+                    </p>
+                    <p
+                      className="opacity-60"
+                      style={{
+                        fontFamily: "monospace",
+                        fontSize: "10px",
+                        lineHeight: "14px",
+                      }}
+                    >
+                      {clinic.address}
+                    </p>
                   </div>
-                  <div className="text-right shrink-0 ml-4">
-                    {clinic.rating && <p className="text-sm font-medium text-amber-600">★ {clinic.rating}</p>}
+                  <div className="text-right shrink-0">
+                    {clinic.rating && (
+                      <p style={{ fontFamily: "monospace", fontSize: "10px", color: "#C07B00", fontWeight: "bold" }}>
+                        ★{clinic.rating}
+                      </p>
+                    )}
                     {clinic.open_now != null && (
-                      <p className={`text-xs mt-0.5 ${clinic.open_now ? "text-green-600" : "text-red-500"}`}>
-                        {clinic.open_now ? "Open" : "Closed"}
+                      <p
+                        style={{
+                          fontFamily: "monospace",
+                          fontSize: "9px",
+                          fontWeight: "bold",
+                          color: clinic.open_now ? "#2E7D32" : "#C62828"
+                        }}
+                      >
+                        {clinic.open_now ? "OPEN" : "CLOSED"}
                       </p>
                     )}
                   </div>
                 </div>
               </button>
             ))}
-            {loading && <p className="text-center text-sm text-ink/50">Checking your calendar…</p>}
+            {loading && <p className="text-center font-['Press_Start_2P'] text-[8px] animate-pulse py-4">Checking calendar...</p>}
           </div>
         )}
 
         {/* Step 3 — Pick a slot */}
         {step === "get_slots" && selectedClinic && (
           <div className="space-y-4">
-            <h2 className="font-semibold text-lg">Available slots at {selectedClinic.name}</h2>
+            <h2 className="font-['Press_Start_2P'] text-[8px] leading-relaxed mb-2">Available slots at {selectedClinic.name}</h2>
             {Object.entries(groupByDay(slots)).map(([day, daySlots]) => (
-              <div key={day} className="bg-white border border-ink/10 rounded-2xl p-4 shadow-soft">
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 mb-3">{day}</p>
+              <div
+                key={day}
+                style={{
+                  backgroundColor: "#E1E8F5",
+                  border: "2px solid #6D87C1",
+                  borderRadius: "4px",
+                  padding: "10px",
+                }}
+              >
+                <p
+                  className="mb-3 font-bold opacity-50"
+                  style={{
+                    fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                    fontSize: "6px",
+                    letterSpacing: "1px",
+                  }}
+                >
+                  {day.toUpperCase()}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {daySlots.map((slot) => (
                     <button
                       key={slot.start}
                       onClick={() => book(slot)}
                       disabled={loading}
-                      className="text-sm px-3 py-1.5 rounded-lg border border-ink/20 hover:border-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-40"
+                      style={{
+                        backgroundColor: "#8DA5D1",
+                        border: "2px solid #2D3E75",
+                        borderRadius: "2px",
+                        padding: "6px 8px",
+                        fontFamily: "monospace",
+                        fontSize: "10px",
+                        fontWeight: "bold",
+                        color: "#1A2B5A",
+                        cursor: "pointer",
+                      }}
+                      className="transition-all active:translate-y-[1px] hover:brightness-95 disabled:opacity-40"
                     >
                       {formatTime(slot.start)}
                     </button>
@@ -149,30 +270,87 @@ export default function ChatPage() {
                 </div>
               </div>
             ))}
-            {slots.length === 0 && <p className="text-sm text-ink/50 text-center">No free slots found in the next 7 days.</p>}
-            {loading && <p className="text-center text-sm text-ink/50">Booking…</p>}
-            <button onClick={reset} className="text-sm text-ink/40 hover:text-ink">← Back</button>
+            {slots.length === 0 && <p className="text-center font-['Press_Start_2P'] text-[8px] py-4">No free slots found.</p>}
+            {loading && <p className="text-center font-['Press_Start_2P'] text-[8px] animate-pulse py-4">Booking...</p>}
+            <button
+              onClick={reset}
+              style={{
+                fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                fontSize: "8px",
+                color: "#1A2B5A",
+                opacity: 0.5,
+              }}
+              className="hover:opacity-100"
+            >
+              ← BACK
+            </button>
           </div>
         )}
 
         {/* Step 4 — Done */}
         {step === "done" && bookedEvent && (
-          <div className="bg-white border border-ink/10 rounded-2xl p-6 shadow-soft text-center space-y-3">
-            <div className="text-4xl">✅</div>
-            <h2 className="text-xl font-semibold">Appointment booked!</h2>
-            <p className="text-ink/60 text-sm">{bookedEvent.summary}</p>
-            <p className="text-ink/60 text-sm">{formatDate(bookedEvent.start)} · {formatTime(bookedEvent.start)} – {formatTime(bookedEvent.end)}</p>
-            <a href={bookedEvent.html_link} target="_blank" rel="noopener noreferrer" className="inline-block text-sm text-blue-600 hover:underline">
-              View in Google Calendar →
+          <div className="text-center space-y-4 p-6">
+            <div className="text-4xl animate-bounce">✅</div>
+            <h2 style={{ fontFamily: "'Press Start 2P', 'Courier New', monospace", fontSize: "12px" }}>BOOKED!</h2>
+            <div
+              className="p-4"
+              style={{
+                backgroundColor: "#EBD9BE", // Goldish background for success
+                border: "3px solid #B8975A",
+                borderRadius: "4px",
+                color: "#4A3520",
+              }}
+            >
+              <p className="font-bold mb-2 uppercase tracking-tight" style={{ fontSize: "14px" }}>{bookedEvent.summary}</p>
+              <p style={{ fontFamily: "monospace", fontSize: "12px" }}>{formatDate(bookedEvent.start)}</p>
+              <p style={{ fontFamily: "monospace", fontSize: "12px" }}>{formatTime(bookedEvent.start)} – {formatTime(bookedEvent.end)}</p>
+            </div>
+
+            <a
+              href={bookedEvent.html_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                fontSize: "8px",
+                color: "#3B82F6",
+                textDecoration: "underline",
+              }}
+            >
+              VIEW IN GOOGLE CALENDAR →
             </a>
+
             <div>
-              <button onClick={reset} className="mt-4 text-sm text-ink/40 hover:text-ink">Book another</button>
+              <button
+                onClick={reset}
+                style={{
+                  fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                  fontSize: "8px",
+                  color: "#1A2B5A",
+                  opacity: 0.6,
+                }}
+                className="mt-4 hover:opacity-100"
+              >
+                BOOK ANOTHER
+              </button>
             </div>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">{error}</div>
+          <div
+            className="p-3 text-red-700"
+            style={{
+              backgroundColor: "#FEE2E2",
+              border: "2px solid #EF4444",
+              borderRadius: "4px",
+              fontFamily: "monospace",
+              fontSize: "11px",
+              fontWeight: "bold",
+            }}
+          >
+            {error}
+          </div>
         )}
       </main>
     </div>
