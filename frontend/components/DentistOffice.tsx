@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import ChatPage from "./ChatPage";
 import { HabitCoachPrompt, useHabitCoachPrompt } from "./HabitCoachPrompt";
 import { SunlifePrompt, useSunlifePrompt } from "./SunlifePrompt";
+import TreatmentPage from "../app/treatment/page";
 
 // ── World dimensions ─────────────────────────────────────────────────────────
 const WORLD_W = 1572;
@@ -211,8 +212,8 @@ function AgentModal({ agentId, onClose }: { agentId: string; onClose: () => void
 
 export default function DentistOffice() {
   const [stage, setStage]                     = useState<Stage>(0);
-  const [flash, setFlash]                     = useState(false);
-  const [treatmentResult, setTreatmentResult] = useState<string | null>(null);
+  const [flash, setFlash]         = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [charPulse, setCharPulse]             = useState(false);
   // "idle" | "fadein" | "zooming"
   const [zoomPhase, setZoomPhase]   = useState<"idle"|"fadein"|"zooming">("idle");
@@ -403,14 +404,9 @@ export default function DentistOffice() {
   }, [stage]);
 
   // ── Upload handler ───────────────────────────────────────────────────────
-  const handleImageUpload = useCallback(async (_file: File) => {
+  const handleImageUpload = useCallback((file: File) => {
     setFlash(true);
-
-    // Call treatment agent (fire-and-forget alongside the flash)
-    fetch("http://localhost:8000/agents/treatment-predictive")
-      .then((r) => r.json())
-      .then((d) => setTreatmentResult(JSON.stringify(d, null, 2)))
-      .catch(() => setTreatmentResult("Analysis complete."));
+    setUploadedFile(file);
 
     // Let flash animation play for FLASH_DURATION then reveal Analyze_teeth
     setTimeout(() => {
@@ -544,6 +540,9 @@ export default function DentistOffice() {
   return (
     <div className="w-screen h-screen overflow-hidden bg-black select-none relative">
       <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
         @keyframes charPulse {
           0%   { transform: scale(1);   filter: drop-shadow(0 3px 5px rgba(0,0,0,0.55)); }
           40%  { transform: scale(1.5); filter: drop-shadow(0 0 18px rgba(255,255,180,0.9)) drop-shadow(0 3px 5px rgba(0,0,0,0.55)); }
@@ -696,25 +695,24 @@ export default function DentistOffice() {
         />
       )}
 
-      {/* Treatment results overlay — stage 5 */}
-      {stage === 5 && treatmentResult && (
-        <div
-          style={{
-            position: "absolute", inset: 0, zIndex: 30,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(0,0,0,0.6)",
-          }}
-        >
-          <div
-            style={{
-              background: "rgba(10,10,20,0.95)", border: "1.5px solid rgba(255,255,255,0.15)",
-              borderRadius: 20, padding: "32px 40px", maxWidth: 560,
-              color: "#fff", backdropFilter: "blur(12px)",
-            }}
-          >
-            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>Treatment Analysis</h2>
-            <pre style={{ fontSize: 13, opacity: 0.85, whiteSpace: "pre-wrap" }}>{treatmentResult}</pre>
-            <p style={{ marginTop: 16, fontSize: 12, opacity: 0.5 }}>Press any key to continue</p>
+      {/* Treatment window — stage 5 */}
+      {stage === 5 && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 30,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,0,0.75)",
+        }}>
+          <div style={{
+            width: "min(90vw, 900px)", maxHeight: "90vh",
+            overflowY: "auto",
+            borderRadius: 20,
+            border: "1.5px solid rgba(255,255,255,0.1)",
+            boxShadow: "0 0 60px rgba(96,165,250,0.1), 0 8px 40px rgba(0,0,0,0.7)",
+          }}>
+            <TreatmentPage initialFile={uploadedFile ?? undefined} />
+          </div>
+          <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", color: "rgba(255,255,255,0.3)", fontSize: 11, pointerEvents: "none" }}>
+            Press any key to continue
           </div>
         </div>
       )}
