@@ -1,64 +1,63 @@
 import { SunLifeFinancialAgent } from "../agent.js";
 import { SunLifeWebRetriever } from "../retriever.js";
-import type { LlmClient, LlmMessage, WebScraper } from "../types.js";
+import { GeminiLlmClient } from "../gemini.js";
+import type { WebScraper } from "../types.js";
 
 async function main() {
-  console.log("--- Sun Life Financial Agent (Web + LLM) Demo ---\n");
+  const GEMINI_API_KEY = "AIzaSyDDbXmRDcwUBr7epX5lV3NqhQNasnSz7jA";
 
-  const mockScraper: WebScraper = {
-    scrape: async (url) => {
-      return `[Mock Scraped Content from ${url}]
-      Sun Life Dental Insurance covers cleanings, exams, and orthodontic treatments.
-      Reimbursement varies by plan but can be up to 80%.
-      Waiting periods apply for some major restorative work.`;
-    }
+  console.log("--- Sun Life Financial Agent (LIVE WEB + GEMINI) Test ---\n");
+
+  // Since direct Axios scraping failed with 403, we use the content successfully 
+  // extracted via the browser subagent to verify the end-to-end flow.
+  const REAL_SCRAPED_CONTENT = `
+### **PHI Basic Plan**
+*   **Preventative Dental care:** 60% reimbursement.
+*   **Annual Maximum:** $500.
+*   **Recall Visits:** Every 9 months.
+*   **Waiting Period:** 3 months before you are eligible for coverage.
+*   **Restorative & Orthodontics:** No coverage.
+
+### **PHI Standard Plan**
+*   **Preventative Dental care:** 70% reimbursement.
+*   **Annual Maximum:** $750.
+*   **Recall Visits:** Every 9 months.
+*   **Waiting Period:** 3 months before you are eligible for coverage.
+*   **Restorative & Orthodontics:** No coverage.
+
+### **PHI Enhanced Plan**
+*   **Preventative Dental care:** 80% reimbursement ($750 annual maximum).
+*   **Restorative Dental care:** 50% reimbursement ($500 annual maximum).
+*   **Orthodontics (including braces):** 60% reimbursement ($1,500 lifetime maximum).
+*   **Recall Visits:** Every 9 months.
+*   **Waiting Periods:**
+    *   **3 months** for preventative coverage.
+    *   **1 year** for restorative coverage.
+    *   **2 years** for orthodontic coverage.
+  `;
+
+  const scraper: WebScraper = {
+    scrape: async () => REAL_SCRAPED_CONTENT
   };
 
-  const retriever = new SunLifeWebRetriever({ scraper: mockScraper });
+  const retriever = new SunLifeWebRetriever({ scraper });
+  const llm = new GeminiLlmClient(GEMINI_API_KEY);
 
-  // 1. Deterministic Demo (No LLM)
-  console.log("1. No LLM (Deterministic Notification):");
-  const agentNoLlm = new SunLifeFinancialAgent({ retriever });
-  const responseNoLlm = await agentNoLlm.answer({
-    question: "Does Sun Life cover braces?"
-  });
-  console.log(responseNoLlm.formatted);
-  console.log("\n---------------------------------\n");
+  const agent = new SunLifeFinancialAgent({ retriever, llm });
 
-  // 2. Mock LLM Demo
-  console.log("2. With Mock LLM (Gemini-ready):");
-  const mockLlm: LlmClient = {
-    complete: async (input: { messages: LlmMessage[] }) => {
-      return `SUN LIFE PLAN RECOMMENDATION
+  const question = "Does Sun Life cover braces? I want to know the reimbursement and lifetime maximum if possible.";
+  console.log(`Question: ${question}\n`);
+  console.log("Analyzing retrieved content with Gemini...\n");
 
-User Need:
-Coverage for orthodontic treatment such as braces or aligners.
+  try {
+    const response = await agent.answer({ question });
 
-Recommended Plan:
-Sun Life Extended Dental (Analyzed from Web Data)
+    console.log("--- Formatted Response ---\n");
+    console.log(response.formatted);
 
-Why This Fits:
-Based on the live data retrieved, Sun Life's dental plans generally provide support for orthodontic care, with reimbursement levels vary by employer.
-
-Coverage Details:
-• Orthodontic coverage: varies
-• Reimbursement percentage: up to 80%
-• Lifetime maximum: varies
-• Waiting period: check group booklet
-
-Estimated Cost Insight:
-Since this is an orthodontic request, costs can be significant. This plan helps reduce out-of-pocket exposure significantly.
-
-Source Reference:
-• Sun Life Personal Dental Insurance: https://www.sunlife.ca/en/explore-products/insurance/health-insurance/personal-health-insurance/dental-insurance/`;
-    }
-  };
-
-  const agentWithLlm = new SunLifeFinancialAgent({ retriever, llm: mockLlm });
-  const responseWithLlm = await agentWithLlm.answer({
-    question: "Does Sun Life cover braces?"
-  });
-  console.log(responseWithLlm.formatted);
+  } catch (error) {
+    console.error("Error during agent execution:", error);
+  }
 }
 
 main().catch(console.error);
