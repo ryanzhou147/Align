@@ -5,7 +5,7 @@ const WORLD_W = 1572;
 const WORLD_H = 998;
 
 // ── Zoom preview defaults (edit to match DentistOffice.tsx values) ───────────
-const ZOOM_ORIGIN_X = 55.8;  // %
+const ZOOM_ORIGIN_X = 55.7;  // %
 const ZOOM_ORIGIN_Y = 19.3;  // %
 const ZOOM_SCALE    = 3.7;
 const ZOOM_DURATION = 3;     // seconds
@@ -22,10 +22,19 @@ const IMAGES = [
 
 function pctFromClient(clientX: number, clientY: number, el: HTMLElement) {
   const rect = el.getBoundingClientRect();
-  return {
-    rx: (clientX - rect.left) / rect.width,
-    ry: (clientY - rect.top)  / rect.height,
-  };
+  // Account for objectFit:contain letterboxing
+  const imgScale = Math.min(rect.width / WORLD_W, rect.height / WORLD_H);
+  const imgW     = WORLD_W * imgScale;
+  const imgH     = WORLD_H * imgScale;
+  const imgLeft  = (rect.width  - imgW) / 2;
+  const imgTop   = (rect.height - imgH) / 2;
+  // Coords relative to the actual image content (clamped)
+  const rx = Math.max(0, Math.min(1, (clientX - rect.left - imgLeft) / imgW));
+  const ry = Math.max(0, Math.min(1, (clientY - rect.top  - imgTop)  / imgH));
+  // Also expose container fractions (for transformOrigin use)
+  const cx = (clientX - rect.left) / rect.width;
+  const cy = (clientY - rect.top)  / rect.height;
+  return { rx, ry, cx, cy };
 }
 
 function CompareKeyHandler({ onToggle }: { onToggle: () => void }) {
@@ -50,7 +59,7 @@ export default function CalibratePage() {
   const [overlayY,    setOverlayY]    = useState(0);   // % top offset
   const [overlayScale, setOverlayScale] = useState(100); // % of container size
 
-  const [hover, setHover] = useState<{ wx: number; wy: number; px: number; py: number } | null>(null);
+  const [hover, setHover] = useState<{ wx: number; wy: number; px: number; py: number; cpx: number; cpy: number } | null>(null);
   const [pins,  setPins]  = useState<Pin[]>([]);
   const [copied, setCopied]       = useState<string | null>(null);
   const [previewing, setPreviewing]   = useState(false);
@@ -66,12 +75,14 @@ export default function CalibratePage() {
   const getCoords = useCallback((clientX: number, clientY: number) => {
     const el = containerRef.current;
     if (!el) return null;
-    const { rx, ry } = pctFromClient(clientX, clientY, el);
+    const { rx, ry, cx, cy } = pctFromClient(clientX, clientY, el);
     return {
-      wx: Math.round(rx * WORLD_W),
-      wy: Math.round(ry * WORLD_H),
-      px: +(rx * 100).toFixed(2),
-      py: +(ry * 100).toFixed(2),
+      wx:  Math.round(rx * WORLD_W),   // true image world px
+      wy:  Math.round(ry * WORLD_H),
+      px:  +(rx * 100).toFixed(2),     // % within image (for SPAWN)
+      py:  +(ry * 100).toFixed(2),
+      cpx: +(cx * 100).toFixed(2),     // % of container (for transformOrigin)
+      cpy: +(cy * 100).toFixed(2),
     };
   }, []);
 
@@ -300,10 +311,10 @@ export default function CalibratePage() {
               borderRadius: 8, padding: "8px 12px", fontSize: 11, lineHeight: 1.8,
               pointerEvents: "none",
             }}>
-              <div><span style={{ color: "#a78bfa" }}>world  </span> x: <b>{hover.wx}</b>  y: <b>{hover.wy}</b></div>
-              <div><span style={{ color: "#34d399" }}>percent</span> x: <b>{hover.px}%</b>  y: <b>{hover.py}%</b></div>
-              <div style={{ opacity: 0.55 }}>SPAWN_X offset: <b>{hover.wx - Math.round(WORLD_W/2) >= 0 ? "+" : ""}{hover.wx - Math.round(WORLD_W/2)}</b>px</div>
-              <div style={{ opacity: 0.55 }}>transformOrigin: <b>&quot;{hover.px}% {hover.py}%&quot;</b></div>
+              <div><span style={{ color: "#a78bfa" }}>world px  </span> x: <b>{hover.wx}</b>  y: <b>{hover.wy}</b></div>
+              <div><span style={{ color: "#34d399" }}>img %     </span> x: <b>{hover.px}%</b>  y: <b>{hover.py}%</b>  ← use for SPAWN</div>
+              <div style={{ opacity: 0.7 }}><span style={{ color: "#fbbf24" }}>container%</span> x: <b>{hover.cpx}%</b>  y: <b>{hover.cpy}%</b>  ← use for transformOrigin</div>
+              <div style={{ opacity: 0.55, marginTop: 2 }}>SPAWN_X = {hover.wx} - CHAR_W/2,  SPAWN_Y = {hover.wy}</div>
             </div>
           )}
         </div>

@@ -5,13 +5,13 @@ import { useEffect, useRef, useState, useCallback } from "react";
 const WORLD_W = 1572;
 const WORLD_H = 998;
 
-const CHAR_W = 42;  // +20% from original 35
-const CHAR_H = 78;  // +20% from original 65
+const CHAR_W = 50;  // +40% from original 35 (two rounds of +20%)
+const CHAR_H = 94;  // +40% from original 65
 const SPEED = 3;
 
-// Spawns at calibrated position (842, 324)
-const SPAWN_X = 842 - CHAR_W / 2;
-const SPAWN_Y = 324;
+// Spawns at calibrated position (840, 316)
+const SPAWN_X = 840 - CHAR_W / 2;
+const SPAWN_Y = 276;
 
 const SPRITES: Record<string, string> = {
   front: "/char_front.png",
@@ -64,6 +64,15 @@ export default function DentistOffice() {
   const [zoomPhase, setZoomPhase]   = useState<"idle"|"fadein"|"zooming">("idle");
   const [zoomOpacity, setZoomOpacity] = useState(0);
   const [zoomScale,   setZoomScale]   = useState(3.7);
+
+  // Viewport size — needed to account for objectFit:contain letterboxing
+  const [vp, setVp] = useState({ w: 1920, h: 1080 });
+  useEffect(() => {
+    const update = () => setVp({ w: window.innerWidth, h: window.innerHeight });
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   // Character state
   const keysRef = useRef<Set<string>>(new Set());
@@ -317,6 +326,17 @@ export default function DentistOffice() {
   const showChar    = movementUnlocked.current;
   const isZoomedOut = stage >= 6;
 
+  // Compute actual image rect accounting for objectFit:contain letterboxing
+  const imgScale  = Math.min(vp.w / WORLD_W, vp.h / WORLD_H);
+  const imgW      = WORLD_W * imgScale;
+  const imgH      = WORLD_H * imgScale;
+  const imgLeft   = (vp.w - imgW) / 2;
+  const imgTop    = (vp.h - imgH) / 2;
+  // Character position in absolute screen pixels
+  const charPx    = imgLeft + pos.x * imgScale;
+  const charPy    = imgTop  + pos.y * imgScale;
+  const charPw    = CHAR_W  * imgScale;
+
   return (
     <div className="w-screen h-screen overflow-hidden bg-black select-none relative">
       <style>{`
@@ -341,7 +361,7 @@ export default function DentistOffice() {
             position: "absolute", inset: 0,
             width: "100%", height: "100%",
             objectFit: "contain",
-            transformOrigin: "55.8% 19.3%",
+            transformOrigin: "55.7% 19.3%",
             transform: `scale(${zoomScale})`,
             opacity: zoomOpacity,
             transition: zoomPhase === "fadein"
@@ -395,10 +415,10 @@ export default function DentistOffice() {
           draggable={false}
           style={{
             position: "absolute",
-            left: `${(pos.x / WORLD_W) * 100}%`,
-            top:  `${(pos.y / WORLD_H) * 100}%`,
-            width:  `${(CHAR_W / WORLD_W) * 100}%`,
-            height: "auto",
+            left: charPx,
+            top:  charPy,
+            width:  charPw,
+            height: CHAR_H * imgScale,
             imageRendering: "auto",
             zIndex: 10,
             animation: charPulse ? "charPulse 1s ease-out forwards" : undefined,
