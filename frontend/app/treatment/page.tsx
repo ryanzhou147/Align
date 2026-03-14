@@ -16,7 +16,7 @@ type Analysis = {
 type Result = { analysis: Analysis; timeline: TimelineEntry[] };
 type Stage = "idle" | "loading" | "done" | "error";
 
-// Shorter durations — total ~5s fake progress
+// Shorter durations — total ~5s animated progress
 const LOADING_STEPS = [
   { label: "UPLOADING IMAGE...",          duration: 400  },
   { label: "SCANNING DENTAL STRUCTURE...",duration: 1000 },
@@ -108,7 +108,7 @@ export default function TreatmentPage({ initialFile }: { initialFile?: File }) {
     if (f?.type.startsWith("image/")) handleFile(f);
   }, []);
 
-  const runFakeProgress = async (done: { resolved: boolean }) => {
+  const runProgressAnimation = async (done: { resolved: boolean }) => {
     setLStep(0); setSProg(0);
     // Run all steps except the last one at fixed speed
     for (let i = 0; i < LOADING_STEPS.length - 1; i++) {
@@ -140,7 +140,7 @@ export default function TreatmentPage({ initialFile }: { initialFile?: File }) {
     const apiCall = fetch(`${API_BASE}/agents/treatment-predictive/analyze`, { method: "POST", body: form })
       .then(r => { done.resolved = true; return r; });
     try {
-      const [res] = await Promise.all([apiCall, runFakeProgress(done)]);
+      const [res] = await Promise.all([apiCall, runProgressAnimation(done)]);
       if (!res.ok) {
         const body = await res.json().catch(() => ({ detail: "Unknown error" }));
         throw new Error(body.detail ?? `HTTP ${res.status}`);

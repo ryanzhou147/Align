@@ -465,8 +465,8 @@ const STEPS = [
   { label: "FINALIZING...", duration: 999 }, // last step: loop until API done
 ];
 
-// runFakeProgress loops the final step until `done.resolved = true`
-const runFakeProgress = async (done: { resolved: boolean }) => {
+// runProgressAnimation loops the final step until `done.resolved = true`
+const runProgressAnimation = async (done: { resolved: boolean }) => {
   for (let i = 0; i < STEPS.length - 1; i++) {
     setStep(i);
     // tick through duration...
@@ -485,7 +485,7 @@ const runFakeProgress = async (done: { resolved: boolean }) => {
 // In analyze():
 const done = { resolved: false };
 const apiCall = fetch(url, opts).then(r => { done.resolved = true; return r; });
-await Promise.all([apiCall, runFakeProgress(done)]);
+await Promise.all([apiCall, runProgressAnimation(done)]);
 ```
 
 Step row visual:
