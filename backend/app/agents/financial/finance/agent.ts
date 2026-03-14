@@ -1,5 +1,4 @@
 import {
-  buildRecommendationPrompt,
   formatRecommendation,
   SUN_LIFE_SYSTEM_PROMPT
 } from "./prompt.js";
@@ -14,7 +13,7 @@ import type {
 } from "./types.js";
 
 const DEFAULT_DISCLAIMER =
-  "This assistant provides educational insurance information based on retrieved Sun Life sources and is not a licensed financial advisor.";
+  "This assistant provides educational insurance information based on live data retrieved from Sun Life sources and is not a licensed financial advisor.";
 
 export class SunLifeFinancialAgent {
   constructor(
@@ -22,15 +21,17 @@ export class SunLifeFinancialAgent {
       retriever: SunLifeRetriever;
       llm?: LlmClient;
     }
-  ) {}
+  ) { }
 
   async answer(request: AgentRequest): Promise<AgentResponse> {
     const categories = classifyUserNeed(request.question);
     const userNeed = summarizeUserNeed(request.question, categories);
+
+    // The retriever now fetches live web data instead of mock data.
     const retrievalResults = await this.dependencies.retriever.retrieve({
-      query: buildRetrievalQuery(request),
+      query: request.question,
       categories,
-      limit: 3
+      limit: 1
     });
 
     if (retrievalResults.length === 0) {
@@ -38,13 +39,13 @@ export class SunLifeFinancialAgent {
         userNeed,
         recommendedPlan: "No matching Sun Life source found",
         whyThisPlanFits:
-          "I could not find a retrieved Sun Life source that clearly matches this dental request yet.",
+          "I could not retrieve live Sun Life data for this request at the moment.",
         coverageDetails: {
           orthodonticCoverage: "varies",
-          otherRelevantBenefits: ["Please retrieve additional Sun Life plan documents before recommending"]
+          otherRelevantBenefits: ["Please check Sun Life's official website directly."]
         },
         estimatedCostInsight:
-          "Without a matching Sun Life source, I cannot estimate how coverage would affect treatment costs.",
+          "Without live data, I cannot estimate how coverage would affect treatment costs.",
         sourceReferences: [],
         relatedPlans: [],
         disclaimer: DEFAULT_DISCLAIMER,
@@ -57,6 +58,8 @@ export class SunLifeFinancialAgent {
       };
     }
 
+    // If an LLM (Gemini) is provided, it will analyze the scraped content.
+    // Otherwise, we provide a deterministic notification.
     const structured = this.dependencies.llm
       ? await this.generateWithLlm(request.question, userNeed, retrievalResults)
       : this.generateDeterministicRecommendation(userNeed, retrievalResults);
@@ -72,11 +75,19 @@ export class SunLifeFinancialAgent {
     userNeed: string,
     retrievalResults: RetrievalResult[]
   ): Promise<RecommendationResult> {
-    const prompt = buildRecommendationPrompt({
-      userQuestion: question,
-      userNeed,
-      retrievalResults
-    });
+    // Enhanced prompt includes the scraped content for Gemini to analyze
+    const context = retrievalResults
+      .map(r => `Source: ${r.document.source.url}\nContent: ${r.rawContent ?? "No content found"}`)
+      .join("\n\n");
+
+    const prompt = `User Question: ${question}
+Detected Need: ${userNeed}
+
+Below is the live content retrieved from Sun Life's website. Please analyze it to provide the most optimal finance solution for the user:
+
+${context}
+
+Please provide your analysis following the required structure.`;
 
     const completion = await this.dependencies.llm!.complete({
       messages: [
@@ -86,6 +97,9 @@ export class SunLifeFinancialAgent {
     });
 
     const fallback = this.generateDeterministicRecommendation(userNeed, retrievalResults);
+
+    // In a real implementation, you'd parse the LLM's structured output.
+    // Here we use the completion as the primary reasoning.
     return {
       ...fallback,
       whyThisPlanFits: completion.trim() || fallback.whyThisPlanFits
@@ -96,16 +110,16 @@ export class SunLifeFinancialAgent {
     userNeed: string,
     retrievalResults: RetrievalResult[]
   ): RecommendationResult {
-    const [best, ...rest] = retrievalResults;
+    const [best] = retrievalResults;
 
     return {
       userNeed,
       recommendedPlan: best.document.planName,
-      whyThisPlanFits: buildWhyThisPlanFits(userNeed, best, rest),
+      whyThisPlanFits: "Live data has been retrieved and is ready for LLM analysis.",
       coverageDetails: best.document.coverage,
-      estimatedCostInsight: buildEstimatedCostInsight(best),
-      sourceReferences: retrievalResults.map((result) => result.document.source),
-      relatedPlans: rest.map((result) => result.document.planName),
+      estimatedCostInsight: "Detailed cost insights will be provided once the Gemini key is configured.",
+      sourceReferences: [best.document.source],
+      relatedPlans: [],
       disclaimer: DEFAULT_DISCLAIMER,
       retrievalResults
     };
@@ -160,44 +174,4 @@ function summarizeUserNeed(question: string, categories: UserNeedCategory[]): st
     return "Coverage for general dental treatment.";
   }
   return `Help choosing the best Sun Life dental plan for: ${question}`;
-}
-
-function buildRetrievalQuery(request: AgentRequest): string {
-  const details = request.context?.notes ? ` ${request.context.notes}` : "";
-  return `${request.question}${details}`;
-}
-
-function buildWhyThisPlanFits(
-  userNeed: string,
-  best: RetrievalResult,
-  alternatives: RetrievalResult[]
-): string {
-  const normalizedNeed = userNeed.endsWith(".") ? userNeed.slice(0, -1) : userNeed;
-  const comparison =
-    alternatives.length > 0
-      ? ` It ranked ahead of ${alternatives
-          .map((result) => result.document.planName)
-          .join(", ")} based on the retrieved coverage match.`
-      : "";
-
-  const orthodonticLine =
-    best.document.coverage.orthodonticCoverage === "yes"
-      ? " The retrieved source indicates orthodontic support, which matters for braces-focused questions."
-      : best.document.coverage.orthodonticCoverage === "varies"
-        ? " The retrieved source shows that coverage depends on the employer or plan design, so users should verify their exact benefits."
-        : "";
-
-  return `${best.document.planName} is the strongest retrieved match for this need: ${normalizedNeed}.${orthodonticLine}${comparison}`.trim();
-}
-
-function buildEstimatedCostInsight(best: RetrievalResult): string {
-  if (best.document.coverage.orthodonticCoverage === "yes") {
-    return "Orthodontic treatment can be expensive, so a plan with orthodontic support may reduce out-of-pocket costs, subject to reimbursement rules, waiting periods, and plan maximums in the retrieved Sun Life source.";
-  }
-
-  if (best.document.coverage.orthodonticCoverage === "varies") {
-    return "Your final cost depends on the employer-selected Sun Life coverage, so reimbursement and maximums should be checked against the exact group benefits booklet or plan page.";
-  }
-
-  return "This plan may help with routine dental costs, but orthodontic expenses may remain mostly out of pocket if braces or aligners are not included.";
 }
