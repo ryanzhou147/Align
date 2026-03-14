@@ -397,23 +397,23 @@ export default function DentistOffice() {
               @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
               @keyframes rpgBlink { 0%,100%{opacity:1} 50%{opacity:0} }
               .rpg-blink { animation: rpgBlink 1s step-end infinite; }
-              @keyframes rpgPulse { 0%,100%{box-shadow:6px 6px 0 #3D2B1F} 50%{box-shadow:6px 6px 0 #C8960C, 0 0 24px #F5C84255} }
+              @keyframes rpgPulse { 0%,100%{box-shadow:6px 6px 0 #1A3A5E} 50%{box-shadow:6px 6px 0 #1B6FAD, 0 0 24px #4AAEE055} }
               .rpg-dropzone { animation: rpgPulse 2s ease-in-out infinite; transition: background 0.1s; }
-              .rpg-dropzone:hover { background: #C8960C22 !important; }
+              .rpg-dropzone:hover { background: #1B6FAD22 !important; }
             `}</style>
             <div style={{
               fontFamily: "'Press Start 2P', monospace",
-              background: "#EAD3A2",
-              border: "6px solid #3D2B1F",
-              boxShadow: "8px 8px 0 #3D2B1F",
+              background: "#C5DCF0",
+              border: "6px solid #1A3A5E",
+              boxShadow: "8px 8px 0 #1A3A5E",
               width: "min(560px, 88vw)",
               overflow: "hidden",
               marginBottom: "80px",
             }}>
               {/* Title bar */}
               <div style={{
-                background: "#D4B896",
-                borderBottom: "5px solid #3D2B1F",
+                background: "#A2C4E0",
+                borderBottom: "5px solid #1A3A5E",
                 padding: "14px 20px",
                 display: "flex",
                 alignItems: "center",
@@ -421,7 +421,7 @@ export default function DentistOffice() {
                 gap: 12,
               }}>
                 <span style={{ fontSize: 16 }}>📷</span>
-                <span style={{ fontSize: 13, color: "#2C1810", letterSpacing: "4px" }}>UPLOAD PHOTO</span>
+                <span style={{ fontSize: 13, color: "#0D1E30", letterSpacing: "4px" }}>UPLOAD PHOTO</span>
               </div>
 
               {/* Drop zone — the whole thing is the click target */}
@@ -433,8 +433,8 @@ export default function DentistOffice() {
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                   margin: "20px",
                   padding: "40px 24px",
-                  border: "5px dashed #3D2B1F",
-                  background: "#D4B896",
+                  border: "5px dashed #1A3A5E",
+                  background: "#A2C4E0",
                   cursor: "pointer",
                   gap: 20,
                 }}
@@ -442,19 +442,19 @@ export default function DentistOffice() {
                 {/* Upload arrow icon */}
                 <div style={{ fontSize: 56, lineHeight: 1 }}>⬆</div>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 12, color: "#2C1810", letterSpacing: "2px", lineHeight: "2.4", margin: 0 }}>
+                  <p style={{ fontSize: 12, color: "#0D1E30", letterSpacing: "2px", lineHeight: "2.4", margin: 0 }}>
                     CLICK HERE TO UPLOAD<br/>YOUR TEETH PHOTO
                   </p>
                 </div>
                 <div style={{
-                  background: "#C8960C",
-                  border: "4px solid #3D2B1F",
-                  boxShadow: "4px 4px 0 #3D2B1F",
+                  background: "#1B6FAD",
+                  border: "4px solid #1A3A5E",
+                  boxShadow: "4px 4px 0 #1A3A5E",
                   padding: "12px 28px",
                 }}>
-                  <span style={{ fontSize: 11, color: "#140904", letterSpacing: "2px" }}>▶ SELECT FILE</span>
+                  <span style={{ fontSize: 11, color: "#C5DCF0", letterSpacing: "2px" }}>▶ SELECT FILE</span>
                 </div>
-                <span style={{ fontSize: 8, color: "#7A5C3A", letterSpacing: "1px" }}>OR DRAG &amp; DROP · JPEG / PNG</span>
+                <span style={{ fontSize: 8, color: "#4A6E94", letterSpacing: "1px" }}>OR DRAG &amp; DROP · JPEG / PNG</span>
                 <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileInput} />
               </label>
 
@@ -462,12 +462,12 @@ export default function DentistOffice() {
               <div style={{
                 margin: "0 20px 20px",
                 padding: "14px 16px",
-                background: "#D4B896",
-                border: "4px solid #3D2B1F",
+                background: "#A2C4E0",
+                border: "4px solid #1A3A5E",
                 display: "flex", gap: 14, alignItems: "center",
               }}>
                 <span style={{ fontSize: 28, flexShrink: 0 }}>🦷</span>
-                <p style={{ fontSize: 9, color: "#2C1810", lineHeight: "2.4", margin: 0 }}>
+                <p style={{ fontSize: 9, color: "#0D1E30", lineHeight: "2.4", margin: 0 }}>
                   &ldquo;Show me your best smile for the camera!&rdquo;
                   <span className="rpg-blink" style={{ marginLeft: 4 }}>▌</span>
                 </p>

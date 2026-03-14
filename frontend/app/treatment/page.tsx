@@ -28,17 +28,17 @@ const LOADING_STEPS = [
 ];
 
 const C = {
-  bg:      "#EAD3A2",
-  bgDark:  "#D4B896",
-  bgDeep:  "#C4A070",
-  border:  "#3D2B1F",
-  text:    "#2C1810",
-  muted:   "#7A5C3A",
-  gold:    "#C8960C",
-  goldBrt: "#F5C842",
+  bg:      "#C5DCF0",
+  bgDark:  "#A2C4E0",
+  bgDeep:  "#7AAFD4",
+  border:  "#1A3A5E",
+  text:    "#0D1E30",
+  muted:   "#4A6E94",
+  gold:    "#1B6FAD",
+  goldBrt: "#4AAEE0",
   red:     "#7A2020",
   green:   "#2A5A1A",
-  page:    "#140904",
+  page:    "#081525",
 };
 
 const FONT = "'Press Start 2P', monospace";
