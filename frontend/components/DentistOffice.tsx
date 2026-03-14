@@ -733,7 +733,16 @@ export default function DentistOffice() {
       {/* Habit Coach prompt */}
       <HabitCoachPrompt
         isOpen={activeAgent === "habit"}
-        onClose={() => setActiveAgent(null)}
+        onClose={() => {
+          setActiveAgent(null);
+          if (habitResult) {
+            fetch("http://localhost:8000/agents/habit-coaching/notify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: "Your habit coaching session is complete. Time to brush! 🦷" }),
+            }).catch(() => {});
+          }
+        }}
         isLoading={habitLoading}
         analysisResult={habitResult}
         onAnalyze={(medications) =>

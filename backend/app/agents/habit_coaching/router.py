@@ -1,6 +1,10 @@
 import os
+import httpx
 from fastapi import APIRouter
 from pydantic import BaseModel
+
+PUSHOVER_APP_TOKEN = os.getenv("PUSHOVER_APP_TOKEN", "")
+PUSHOVER_USER_KEY  = os.getenv("PUSHOVER_USER_KEY", "")
 
 router = APIRouter(prefix="/agents/habit-coaching", tags=["Habit Coaching Agent"])
 
@@ -60,3 +64,25 @@ def analyze_habits(req: HabitAnalyzeRequest) -> dict:
             )
             tips.append(tip)
         return {"coaching_plan": "\n".join(tips)}
+
+
+class NotifyRequest(BaseModel):
+    message: str = "Your habit coaching session is complete. Time to brush! 🦷"
+
+
+@router.post("/notify")
+async def send_pushover_notification(req: NotifyRequest) -> dict:
+    if not PUSHOVER_APP_TOKEN or not PUSHOVER_USER_KEY:
+        return {"ok": False, "error": "Pushover keys not configured"}
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://api.pushover.net/1/messages.json",
+            data={
+                "token":    PUSHOVER_APP_TOKEN,
+                "user":     PUSHOVER_USER_KEY,
+                "title":    "Dental Habit Coach",
+                "message":  req.message,
+                "priority": 1,
+            },
+        )
+    return {"ok": resp.status_code == 200, "status": resp.status_code}
