@@ -48,6 +48,7 @@ export interface RetrievalResult {
   document: SunLifePlanDocument;
   score: number;
   matchedTerms: string[];
+  rawContent?: string;
 }
 
 export interface RecommendationResult {
@@ -73,6 +74,10 @@ export interface SunLifeRetriever {
     categories: UserNeedCategory[];
     limit?: number;
   }): Promise<RetrievalResult[]>;
+}
+
+export interface WebScraper {
+  scrape(url: string): Promise<string>;
 }
 
 export interface LlmMessage {

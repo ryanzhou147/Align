@@ -1,8 +1,6 @@
 export { SunLifeFinancialAgent, classifyUserNeed } from "./agent.js";
-export { InMemorySunLifeRetriever } from "./retriever.js";
-export { mockSunLifeDocuments } from "./mockData.js";
+export { SunLifeWebRetriever } from "./retriever.js";
 export {
-  buildRecommendationPrompt,
   formatRecommendation,
   SUN_LIFE_SYSTEM_PROMPT
 } from "./prompt.js";
@@ -18,5 +16,6 @@ export type {
   SunLifePlanDocument,
   SunLifeRetriever,
   UserContext,
-  UserNeedCategory
+  UserNeedCategory,
+  WebScraper
 } from "./types.js";
