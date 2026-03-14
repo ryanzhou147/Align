@@ -12,6 +12,7 @@ Step 3  book           { google_token, clinic_name, clinic_address,
           → { step: "done", event: {...} }
 """
 
+from typing import Optional
 from datetime import datetime, timedelta, timezone
 from .google_places import find_nearby_clinics
 from .google_calendar import get_free_slots, create_event
@@ -22,7 +23,7 @@ async def wizard_find_clinics(lat: float, lng: float, radius_km: float = 5) -> d
     return {"step": "select_clinic", "clinics": clinics}
 
 
-def wizard_get_slots(google_token: str, start_date: str | None, end_date: str | None) -> dict:
+def wizard_get_slots(google_token: str, start_date: Optional[str], end_date: Optional[str]) -> dict:
     if not start_date:
         today = datetime.now(timezone.utc).date()
         start_date = today.isoformat()

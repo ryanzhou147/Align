@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 from pydantic import BaseModel
 
@@ -36,8 +37,8 @@ async def wizard_step_find_clinics(req: FindClinicsRequest):
 
 class GetSlotsRequest(BaseModel):
     google_token: str
-    start_date: str | None = None
-    end_date: str | None = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 @router.post("/wizard/get-slots")
