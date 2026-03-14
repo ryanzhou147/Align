@@ -16,7 +16,7 @@ const MEDICATIONS = [
 
 interface HabitCoachPromptProps {
     isOpen: boolean;
-    onClose: () => void;
+    onClose: (medications: string[]) => void;
     /** Called when user completes the checklist — pass in your image data or URL */
     onAnalyze?: (medications: string[]) => void;
     /** Pass Gemini analysis results here when ready */
@@ -105,7 +105,7 @@ export function HabitCoachPrompt({
     // ESC to close
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
+            if (e.key === "Escape") onClose(selectedMedications);
         },
         [onClose],
     );
@@ -152,7 +152,7 @@ export function HabitCoachPrompt({
                 className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
                     }`}
                 style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
-                onClick={onClose}
+                onClick={() => onClose(selectedMedications)}
             >
                 {/* ── Outer wrapper ── */}
                 <div
@@ -180,7 +180,7 @@ export function HabitCoachPrompt({
                     >
                         {/* Close button */}
                         <button
-                            onClick={onClose}
+                            onClick={() => onClose(selectedMedications)}
                             className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center transition-transform hover:scale-110 active:scale-95"
                             style={{
                                 backgroundColor: "#7A9A72",
@@ -276,7 +276,7 @@ export function HabitCoachPrompt({
                                             LET&apos;S GO!
                                         </button>
                                         <button
-                                            onClick={onClose}
+                                            onClick={() => onClose(selectedMedications)}
                                             className="flex-1 transition-all duration-150 hover:brightness-95 active:translate-y-[1px]"
                                             style={{
                                                 backgroundColor: "#C8DCC0",
@@ -493,7 +493,7 @@ export function HabitCoachPrompt({
                                     </div>
 
                                     <button
-                                        onClick={onClose}
+                                        onClick={() => onClose(selectedMedications)}
                                         className="w-full transition-all duration-150 hover:brightness-95 active:translate-y-[1px]"
                                         style={{
                                             backgroundColor: "#C8DCC0",

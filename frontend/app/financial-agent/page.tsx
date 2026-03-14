@@ -1,95 +1,86 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
+import { SunlifePrompt, useSunlifePrompt } from "./SunlifePrompt";
 
 export default function FinancialAgentPage() {
-  const [result, setResult] = useState<string | null>(null);
-  const [scraped, setScraped] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const {
+        isOpen,
+        isLoading,
+        analysisResult,
+        sourceUrl,
+        openSunlife,
+        closeSunlife,
+        startAnalysis,
+    } = useSunlifePrompt();
 
-  useEffect(() => {
-    fetch("http://localhost:8000/agents/financial/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: "What Sun Life dental plan best covers my treatment?" }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        setResult(data.recommendation ?? JSON.stringify(data, null, 2));
-        setScraped(!!data.scraped);
-        if (data.error) setError(data.error);
-      })
-      .catch(() => setResult("Unable to reach the financial agent. Make sure the backend is running."));
-  }, []);
+    const handleStartAnalysis = async (question: string) => {
+        startAnalysis(async () => {
+            const response = await fetch("http://localhost:8000/agents/financial/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question }),
+            });
 
-  return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #0a1628 0%, #0f2044 50%, #0a1628 100%)",
-      fontFamily: "'Segoe UI', sans-serif",
-      color: "#e8f0fe",
-      padding: "40px 24px",
-    }}>
-      {/* Header */}
-      <div style={{ maxWidth: 800, margin: "0 auto" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-          <img
-            src="/sunlife-logo.png"
-            alt="Sun Life"
-            style={{ width: 56, height: "auto", filter: "drop-shadow(0 2px 8px rgba(255,200,60,0.4))" }}
-          />
-          <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#fff" }}>
-              Sun Life Financial Advisor
-            </h1>
-            <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 4 }}>
-              Powered by Gemini · {scraped ? "Live data from sunlife.ca" : "Using plan reference data"}
-            </p>
-          </div>
-        </div>
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            return data;
+        });
+    };
 
-        {/* Content card */}
-        <div style={{
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 16,
-          padding: "32px 36px",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
-          minHeight: 200,
-        }}>
-          {result === null ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 12, color: "rgba(255,255,255,0.5)" }}>
-              <div style={{
-                width: 18, height: 18, border: "2px solid rgba(96,165,250,0.6)",
-                borderTopColor: "#60a5fa", borderRadius: "50%",
-                animation: "spin 0.8s linear infinite",
-              }} />
-              Analyzing your Sun Life plan with Gemini…
+    return (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-[#4A3520] p-4 text-white">
+            {/* Decorative Background Elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+                <div className="absolute top-10 left-10 w-32 h-32 bg-[#D4B896] blur-3xl rounded-full" />
+                <div className="absolute bottom-10 right-10 w-48 h-48 bg-[#B8975A] blur-3xl rounded-full" />
             </div>
-          ) : (
-            <pre style={{
-              margin: 0, whiteSpace: "pre-wrap", fontSize: 14,
-              lineHeight: 1.8, color: "rgba(255,255,255,0.88)",
-              fontFamily: "inherit",
-            }}>
-              {result}
-            </pre>
-          )}
+
+            <div
+                className="relative z-10 mb-8 p-10 text-center"
+                style={{
+                    backgroundColor: "#D4B896",
+                    border: "4px solid #6B4E2A",
+                    boxShadow: "8px 8px 0 #2A1D0F",
+                    borderRadius: "8px"
+                }}
+            >
+                <div className="mb-4 flex justify-center">
+                    <img src="/sunlife-logo.png" alt="Sun Life" className="w-16 h-auto" />
+                </div>
+                <h1 className="mb-6 font-['Press_Start_2P'] text-2xl text-[#4A3520]">FINANCIAL BOOTH</h1>
+                <p className="mb-8 font-['Press_Start_2P'] text-[10px] leading-relaxed text-[#5A3D1A]">
+                    Simulate a real-time consultation <br /> regarding your insurance coverage.
+                </p>
+
+                <button
+                    onClick={openSunlife}
+                    className="px-8 py-4 font-['Press_Start_2P'] text-sm transition-all hover:scale-105 active:scale-95"
+                    style={{
+                        backgroundColor: "#EBD9BE",
+                        border: "4px solid #6B4E2A",
+                        color: "#4A3520",
+                        boxShadow: "4px 4px 0 #2A1D0F"
+                    }}
+                >
+                    START DEBATE
+                </button>
+            </div>
+
+            <SunlifePrompt
+                isOpen={isOpen}
+                onClose={closeSunlife}
+                onAnalyze={handleStartAnalysis}
+                analysisResult={analysisResult}
+                sourceUrl={sourceUrl}
+                isLoading={isLoading}
+            />
+
+            <div className="mt-4 font-['Press_Start_2P'] text-[8px] opacity-60">
+                LIVE SCRAPE + GEMINI 2.5 FLASH • RPG STYLE
+            </div>
         </div>
-
-        {error && (
-          <div style={{ marginTop: 12, fontSize: 11, color: "rgba(255,100,100,0.7)" }}>
-            Debug: {error}
-          </div>
-        )}
-
-        <div style={{ marginTop: 16, fontSize: 11, color: "rgba(255,255,255,0.25)", textAlign: "center" }}>
-          Sun Life Personal Health Insurance · sunlife.ca · Not financial advice
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
-    </div>
-  );
+    );
 }

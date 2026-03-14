@@ -1,34 +1,39 @@
-import asyncio
 import os
 from fastapi import APIRouter
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 router = APIRouter(prefix="/agents/financial", tags=["Financial Agent"])
+
+# Load local agent .env
+agent_env_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(agent_env_path):
+    load_dotenv(agent_env_path)
 
 SUN_LIFE_URL = "https://www.sunlife.ca/en/explore-products/insurance/health-insurance/personal-health-insurance/dental-insurance/"
 
 # Pre-scraped fallback (Axios/requests gets 403 from Sun Life's CDN)
 SCRAPED_CONTENT_FALLBACK = """
-### PHI Basic Plan
-- Preventative Dental care: 60% reimbursement.
-- Annual Maximum: $500.
-- Recall Visits: Every 9 months.
-- Waiting Period: 3 months.
-- Restorative & Orthodontics: No coverage.
+### Sun Life Basic Plan
+* Preventative Dental Care: 60% reimbursement
+* Annual Maximum: $500
+* Recall Visits: Every 9 months
+* Restorative/Orthodontics: No coverage
 
-### PHI Standard Plan
-- Preventative Dental care: 70% reimbursement.
-- Annual Maximum: $750.
-- Recall Visits: Every 9 months.
-- Waiting Period: 3 months.
-- Restorative & Orthodontics: No coverage.
+### Sun Life Standard Plan
+* Preventative Dental Care: 70% reimbursement
+* Annual Maximum: $750
+* Recall Visits: Every 9 months
+* Restorative/Orthodontics: No coverage
 
-### PHI Enhanced Plan
-- Preventative Dental care: 80% reimbursement ($750 annual maximum).
-- Restorative Dental care: 50% reimbursement ($500 annual maximum).
-- Orthodontics (including braces): 60% reimbursement ($1,500 lifetime maximum).
-- Recall Visits: Every 9 months.
-- Waiting Periods: 3 months (preventative), 1 year (restorative), 2 years (orthodontic).
+### Sun Life Enhanced Plan
+* Preventative Dental Care: 80% reimbursement
+* Annual Maximum(Preventative): $750
+* Recall Visits: Every 9 months
+* Restorative Dental Care: 50% reimbursement
+* Annual Maximum (Restorative): $500
+* Orthodontics: 60% reimbursement (includes braces)
+* Lifetime Maximum (Orthodontics): $1,500
 """
 
 SYSTEM_PROMPT = """You are SunLife Financial Agent, an AI insurance advisor embedded inside a virtual dental clinic application.
@@ -87,16 +92,6 @@ class FinancialAnalyzeRequest(BaseModel):
 
 @router.post("/analyze")
 async def analyze_financial(req: FinancialAnalyzeRequest) -> dict:
-    # Pull latest financial-testing branch (fire-and-forget, non-blocking)
-    try:
-        await asyncio.create_subprocess_exec(
-            "git", "pull", "origin", "financial-testing",
-            stdout=asyncio.subprocess.DEVNULL,
-            stderr=asyncio.subprocess.DEVNULL,
-        )
-    except Exception:
-        pass
-
     # 1. Try live scrape, fall back to pre-scraped content
     scraped_content = await _scrape_sunlife()
 

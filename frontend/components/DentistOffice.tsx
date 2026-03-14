@@ -62,19 +62,6 @@ const FLASH_DURATION = 2000; // ms — camera flash + fade
 
 function AgentModal({ agentId, onClose }: { agentId: string; onClose: () => void }) {
   const zone = AGENT_ZONES.find((z) => z.id === agentId)!;
-  const [financialResult, setFinancialResult] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (agentId !== "financial") return;
-    fetch("http://localhost:8000/agents/financial/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: "What Sun Life dental plan best covers my treatment?" }),
-    })
-      .then((r) => r.json())
-      .then((data) => setFinancialResult(data.recommendation ?? JSON.stringify(data, null, 2)))
-      .catch(() => setFinancialResult("Unable to reach financial agent."));
-  }, [agentId]);
 
   return (
     <div
@@ -91,7 +78,7 @@ function AgentModal({ agentId, onClose }: { agentId: string; onClose: () => void
           background: "rgba(8,10,20,0.97)",
           border: "1.5px solid rgba(255,255,255,0.12)",
           borderRadius: 20,
-          width: agentId === "clinic" ? "min(90vw, 780px)" : "min(90vw, 560px)",
+          width: "min(90vw, 780px)",
           maxHeight: "85vh",
           overflow: "hidden",
           boxShadow: "0 0 60px rgba(96,165,250,0.15), 0 8px 40px rgba(0,0,0,0.6)",
@@ -127,15 +114,6 @@ function AgentModal({ agentId, onClose }: { agentId: string; onClose: () => void
         {agentId === "clinic" && (
           <div style={{ overflowY: "auto", flex: 1 }}>
             <ChatPage />
-          </div>
-        )}
-
-        {/* Financial — show immediately, result streams in */}
-        {agentId === "financial" && (
-          <div style={{ overflowY: "auto", flex: 1, padding: "24px" }}>
-            <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, lineHeight: 1.8, whiteSpace: "pre-wrap", animation: "fadeInUp 0.3s ease" }}>
-              {financialResult ?? "Analyzing your Sun Life plan…"}
-            </div>
           </div>
         )}
       </div>
@@ -177,7 +155,15 @@ export default function DentistOffice() {
   } = useHabitCoachPrompt();
 
   // Sun Life prompt
-  const { isOpen: sunlifeOpen, openSunlifePrompt, closeSunlifePrompt } = useSunlifePrompt();
+  const {
+    isOpen: sunlifeOpen,
+    isLoading: sunlifeLoading,
+    analysisResult: sunlifeResult,
+    sourceUrl: sunlifeSourceUrl,
+    openSunlife,
+    closeSunlife,
+    startAnalysis: startSunlifeAnalysis,
+  } = useSunlifePrompt();
 
   // Viewport size — needed to account for objectFit:contain letterboxing
   const [vp, setVp] = useState({ w: 1920, h: 1080 });
@@ -288,7 +274,7 @@ export default function DentistOffice() {
           setHabitResult(null);
           setActiveAgent("habit");
         } else if (zone === "financial") {
-          openSunlifePrompt();
+          openSunlife();
         } else {
           setActiveAgent(zone);
         }
@@ -674,13 +660,16 @@ export default function DentistOffice() {
       {/* Habit Coach prompt */}
       <HabitCoachPrompt
         isOpen={activeAgent === "habit"}
-        onClose={() => {
+        onClose={(medications) => {
           setActiveAgent(null);
           if (habitResult) {
+            const medLine = medications.length > 0
+              ? ` Remember to take: ${medications.join(", ")}.`
+              : "";
             fetch("http://localhost:8000/agents/habit-coaching/notify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message: "Your habit coaching session is complete. Time to brush! 🦷" }),
+              body: JSON.stringify({ message: `Your habit coaching session is complete. Time to brush! 🦷${medLine}` }),
             }).catch(() => {});
           }
         }}
@@ -702,11 +691,20 @@ export default function DentistOffice() {
       {/* Sun Life prompt */}
       <SunlifePrompt
         isOpen={sunlifeOpen}
-        onClose={closeSunlifePrompt}
-        onConfirm={() => {
-          closeSunlifePrompt();
-          window.open("/financial-agent", "_blank", "popup,width=900,height=700,noopener");
-        }}
+        onClose={closeSunlife}
+        onAnalyze={(question) =>
+          startSunlifeAnalysis(async () => {
+            const res = await fetch("http://localhost:8000/agents/financial/analyze", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ question }),
+            });
+            return await res.json();
+          })
+        }
+        analysisResult={sunlifeResult}
+        sourceUrl={sunlifeSourceUrl}
+        isLoading={sunlifeLoading}
       />
 
       {/* Generic agent modal (clinic) */}
