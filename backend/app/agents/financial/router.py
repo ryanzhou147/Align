@@ -97,13 +97,12 @@ async def analyze_financial(req: FinancialAnalyzeRequest) -> dict:
 
     # 2. Call Gemini
     try:
-        import google.generativeai as genai  # type: ignore
+        from google import genai  # type: ignore
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY not set")
 
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        client = genai.Client(api_key=api_key)
 
         prompt = (
             f"User Question: {req.question}\n\n"
@@ -112,8 +111,9 @@ async def analyze_financial(req: FinancialAnalyzeRequest) -> dict:
             f"{scraped_content}"
         )
 
-        response = model.generate_content(
-            [{"role": "user", "parts": [SYSTEM_PROMPT + "\n\n" + prompt]}]
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=SYSTEM_PROMPT + "\n\n" + prompt,
         )
         return {
             "recommendation": response.text,

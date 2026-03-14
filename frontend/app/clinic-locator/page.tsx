@@ -3,65 +3,104 @@
 import ChatPage from "@/components/ChatPage";
 import { SessionProvider } from "@/components/SessionProvider";
 
+const FONT = "'Press Start 2P', monospace";
+
+const C = {
+  bg: "#F3E5F5",
+  bgDark: "#E1BEE7",
+  border: "#4A148C",
+  text: "#210035",
+  muted: "#7B1FA2",
+  gold: "#9C27B0",
+  page: "#1A0033",
+};
+
 export default function ClinicLocatorPage() {
   return (
     <SessionProvider>
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[#1A2B5A] p-4 text-white">
-        {/* Decorative Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-[#8DA5D1] blur-3xl rounded-full" />
-          <div className="absolute bottom-10 right-10 w-48 h-48 bg-[#4A69B1] blur-3xl rounded-full" />
-        </div>
+      <div
+        className="flex min-h-screen flex-col items-center justify-center p-4"
+        style={{ backgroundColor: C.page, backgroundImage: "url('/Zoom_out_1.png')", backgroundSize: "cover", backgroundPosition: "center" }}
+      >
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+          @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+          .blink { animation: blink 1s step-end infinite; }
+        `}</style>
 
+        {/* Backdrop overlay */}
+        <div className="fixed inset-0 bg-black/60 pointer-events-none" />
+
+        {/* RPG Booth Container */}
         <div
-          className="relative z-10 w-full max-w-2xl"
+          className="relative z-10 w-full max-w-[600px]"
           style={{
-            backgroundColor: "#B8C6E6",
-            border: "4px solid #2D3E75",
-            boxShadow: "8px 8px 0 #0D1B3D",
-            borderRadius: "8px",
-            overflow: "hidden"
+            background: C.bg,
+            border: `6px solid ${C.border}`,
+            boxShadow: `12px 12px 0 ${C.border}`,
           }}
         >
-          {/* Header / Banner */}
-          <div
-            className="p-6 text-center border-b-4 border-[#2D3E75]"
-            style={{ backgroundColor: "#8DA5D1" }}
-          >
-            <div className="mb-2 flex justify-center text-3xl">
-              📍
+          {/* Booth Header */}
+          <div style={{
+            background: C.bgDark,
+            borderBottom: `6px solid ${C.border}`,
+            padding: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "16px",
+          }}>
+            <span style={{ fontSize: "32px" }}>🏠</span>
+            <div style={{ textAlign: "center" }}>
+              <h1 style={{ fontFamily: FONT, fontSize: "16px", color: C.text, margin: 0, letterSpacing: "2px" }}>
+                [ CLINIC BOOTH ]
+              </h1>
+              <p style={{ fontFamily: FONT, fontSize: "8px", color: C.muted, marginTop: "8px", letterSpacing: "1px" }}>
+                GDS-1024 LOCATOR SYSTEM
+              </p>
             </div>
-            <h1 className="mb-2 font-['Press_Start_2P'] text-xl text-[#1A2B5A]">CLINIC BOOTH</h1>
-            <p className="font-['Press_Start_2P'] text-[8px] leading-relaxed text-[#1A2B5A] opacity-70">
-              Find the perfect dental clinic <br /> for your treatment.
-            </p>
+            <span style={{ fontSize: "32px" }}>📍</span>
           </div>
 
-          {/* Content Area */}
-          <div
-            className="p-2 max-h-[70vh] overflow-y-auto pixel-scrollbar"
-            style={{ backgroundColor: "#E1E8F5" }}
-          >
-            <ChatPage />
+          {/* Main Content Area */}
+          <div style={{
+            padding: "8px",
+            background: C.bgDark,
+          }}>
+            <div style={{
+              background: C.bg,
+              border: `4px solid ${C.border}`,
+              minHeight: "400px",
+              display: "flex",
+              flexDirection: "column",
+            }}>
+              <ChatPage />
+            </div>
+          </div>
+
+          {/* Booth Footer */}
+          <div style={{
+            background: C.bgDark,
+            padding: "12px 20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderTop: `2px solid ${C.border}`,
+          }}>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <div style={{ width: "12px", height: "12px", background: C.gold, border: `2px solid ${C.border}` }} />
+              <div style={{ width: "12px", height: "12px", background: C.muted, border: `2px solid ${C.border}` }} />
+            </div>
+            <span className="blink" style={{ fontFamily: FONT, fontSize: "8px", color: C.gold }}>
+              CONNECTION SECURE
+            </span>
           </div>
         </div>
 
-        <div className="mt-6 font-['Press_Start_2P'] text-[8px] opacity-60">
-          LIVE GOOGLE MAPS + CALENDAR • RPG STYLE
-        </div>
-
-        <style jsx global>{`
-        .pixel-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .pixel-scrollbar::-webkit-scrollbar-track {
-          background: #B8C6E6;
-        }
-        .pixel-scrollbar::-webkit-scrollbar-thumb {
-          background: #4A69B1;
-          border: 2px solid #2D3E75;
-        }
-      `}</style>
+        {/* Navigation hint */}
+        <p className="mt-8 relative z-10" style={{ fontFamily: FONT, fontSize: "8px", color: "white", opacity: 0.6 }}>
+          PRESS ESC TO RETURN TO GAME WORLD
+        </p>
       </div>
     </SessionProvider>
   );

@@ -400,25 +400,89 @@ export default function DentistOffice() {
           draggable={false}
         />
 
-        {/* Upload box */}
+        {/* Upload box — pixel RPG style */}
         {!flash && (
           <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 10 }}>
-            <label
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileDrop}
-              style={{
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                width: 340, height: 240,
-                border: "2px dashed rgba(255,255,255,0.7)", borderRadius: 20,
-                background: "rgba(0,0,0,0.55)", cursor: "pointer", color: "#fff", gap: 12,
-                backdropFilter: "blur(6px)",
-              }}
-            >
-              <span style={{ fontSize: 48 }}>📷</span>
-              <span style={{ fontWeight: 700, fontSize: 18 }}>Upload your smile photo</span>
-              <span style={{ fontSize: 13, opacity: 0.7 }}>Click or drag &amp; drop an image</span>
-              <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileInput} />
-            </label>
+            <style>{`
+              @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+              @keyframes rpgBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+              .rpg-blink { animation: rpgBlink 1s step-end infinite; }
+              @keyframes rpgPulse { 0%,100%{box-shadow:6px 6px 0 #3D2B1F} 50%{box-shadow:6px 6px 0 #C8960C, 0 0 24px #F5C84255} }
+              .rpg-dropzone { animation: rpgPulse 2s ease-in-out infinite; transition: background 0.1s; }
+              .rpg-dropzone:hover { background: #C8960C22 !important; }
+            `}</style>
+            <div style={{
+              fontFamily: "'Press Start 2P', monospace",
+              background: "#EAD3A2",
+              border: "6px solid #3D2B1F",
+              boxShadow: "8px 8px 0 #3D2B1F",
+              width: "min(560px, 88vw)",
+              overflow: "hidden",
+              marginBottom: "80px",
+            }}>
+              {/* Title bar */}
+              <div style={{
+                background: "#D4B896",
+                borderBottom: "5px solid #3D2B1F",
+                padding: "14px 20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+              }}>
+                <span style={{ fontSize: 16 }}>📷</span>
+                <span style={{ fontSize: 13, color: "#2C1810", letterSpacing: "4px" }}>UPLOAD PHOTO</span>
+              </div>
+
+              {/* Drop zone — the whole thing is the click target */}
+              <label
+                className="rpg-dropzone"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleFileDrop}
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  margin: "20px",
+                  padding: "40px 24px",
+                  border: "5px dashed #3D2B1F",
+                  background: "#D4B896",
+                  cursor: "pointer",
+                  gap: 20,
+                }}
+              >
+                {/* Upload arrow icon */}
+                <div style={{ fontSize: 56, lineHeight: 1 }}>⬆</div>
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 12, color: "#2C1810", letterSpacing: "2px", lineHeight: "2.4", margin: 0 }}>
+                    CLICK HERE TO UPLOAD<br/>YOUR TEETH PHOTO
+                  </p>
+                </div>
+                <div style={{
+                  background: "#C8960C",
+                  border: "4px solid #3D2B1F",
+                  boxShadow: "4px 4px 0 #3D2B1F",
+                  padding: "12px 28px",
+                }}>
+                  <span style={{ fontSize: 11, color: "#140904", letterSpacing: "2px" }}>▶ SELECT FILE</span>
+                </div>
+                <span style={{ fontSize: 8, color: "#7A5C3A", letterSpacing: "1px" }}>OR DRAG &amp; DROP · JPEG / PNG</span>
+                <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileInput} />
+              </label>
+
+              {/* NPC hint */}
+              <div style={{
+                margin: "0 20px 20px",
+                padding: "14px 16px",
+                background: "#D4B896",
+                border: "4px solid #3D2B1F",
+                display: "flex", gap: 14, alignItems: "center",
+              }}>
+                <span style={{ fontSize: 28, flexShrink: 0 }}>🦷</span>
+                <p style={{ fontSize: 9, color: "#2C1810", lineHeight: "2.4", margin: 0 }}>
+                  &ldquo;Show me your best smile for the camera!&rdquo;
+                  <span className="rpg-blink" style={{ marginLeft: 4 }}>▌</span>
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -642,7 +706,7 @@ export default function DentistOffice() {
           background: "rgba(0,0,0,0.75)",
         }}>
           <div style={{
-            width: "min(90vw, 900px)", maxHeight: "90vh",
+            width: "min(96vw, 1200px)", maxHeight: "92vh",
             overflowY: "auto",
             borderRadius: 20,
             border: "1.5px solid rgba(255,255,255,0.1)",

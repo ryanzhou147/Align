@@ -70,11 +70,11 @@ def _parse_json_response(text: str) -> dict:
 
 
 def _load_demo_images() -> list[dict]:
-    """Load pre-rendered demo images from backend/img/."""
+    """Load pre-rendered demo images from backend/img/, converted to JPEG for consistency."""
     stages = []
     for month, label, filename in _DEMO_STAGES:
         path = _IMG_DIR / filename
-        raw = path.read_bytes()
+        raw = _resize_image(path.read_bytes())  # normalizes to JPEG
         stages.append({
             "month": month,
             "label": label,

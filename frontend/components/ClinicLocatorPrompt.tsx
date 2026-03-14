@@ -2,6 +2,30 @@
 
 import { useEffect, useCallback, useState } from "react";
 
+/* ─── Style Guide Constants ─── */
+const FONT = "'Press Start 2P', monospace";
+
+const C = {
+    bg: "#F3E5F5",  // light lavender — main panel background
+    bgDark: "#E1BEE7",  // lavender — headers, inset areas
+    bgDeep: "#CE93D8",  // medium purple — disabled states
+    border: "#4A148C",  // deep violet — all borders and pixel shadows
+    text: "#210035",  // dark purple — primary text
+    muted: "#7B1FA2",  // orchid — labels, hints
+    gold: "#9C27B0",  // bright purple — active highlights, progress bars
+    goldBrt: "#E1BEE7",  // light highlights
+    red: "#7B1F1F",  // dark red — errors
+    green: "#2E5A1C",  // dark green — success
+    page: "#1A0033",  // deep dark purple — page background
+};
+
+const panel: React.CSSProperties = {
+    background: C.bg,
+    border: `4px solid ${C.border}`,
+    boxShadow: `8px 8px 0 ${C.border}`,
+    overflow: "hidden",
+};
+
 /* ─── Types ─── */
 interface ClinicLocatorPromptProps {
     isOpen: boolean;
@@ -44,27 +68,26 @@ export function ClinicLocatorPrompt({
     return (
         <>
             <style jsx global>{`
-        @keyframes pixelPulseBlue {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
-        }
-        /* Custom scrollbar for pixel feel */
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .blink { animation: blink 1s step-end infinite; }
+        
         .pixel-scrollbar::-webkit-scrollbar {
-          width: 8px;
+          width: 10px;
         }
         .pixel-scrollbar::-webkit-scrollbar-track {
-          background: #B8C6E6;
+          background: ${C.bgDark};
+          border-left: 3px solid ${C.border};
         }
         .pixel-scrollbar::-webkit-scrollbar-thumb {
-          background: #4A69B1;
-          border: 2px solid #2D3E75;
+          background: ${C.muted};
+          border: 2px solid ${C.border};
         }
       `}</style>
 
             <div
                 className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"
                     }`}
-                style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+                style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
                 onClick={onClose}
             >
                 {/* ── Outer pixel border ── */}
@@ -73,41 +96,49 @@ export function ClinicLocatorPrompt({
                     className={`relative transform transition-all duration-300 ease-out ${isVisible ? "scale-100 translate-y-0" : "scale-95 translate-y-3"
                         }`}
                 >
-                    {/* Pixel shadow layer */}
-                    <div
-                        className="absolute inset-0 translate-x-1 translate-y-1"
-                        style={{
-                            backgroundColor: "#2D3E75",
-                            borderRadius: "6px",
-                        }}
-                    />
-
                     {/* Main panel */}
                     <div
-                        className="relative"
                         style={{
-                            width: "520px",
-                            maxWidth: "92vw",
-                            backgroundColor: "#B8C6E6",
-                            border: "4px solid #2D3E75",
-                            borderRadius: "6px",
-                            boxShadow: "inset 0 0 0 2px #E1E8F5, inset 0 0 0 4px #8DA5D1",
+                            width: "560px",
+                            maxWidth: "94vw",
+                            ...panel,
                         }}
                     >
+                        {/* ── Header ── */}
+                        <div style={{
+                            background: C.bgDark,
+                            borderBottom: `4px solid ${C.border}`,
+                            padding: "14px 20px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 12,
+                        }}>
+                            <span style={{ fontSize: 24 }}>📍</span>
+                            <span style={{
+                                fontFamily: FONT,
+                                fontSize: "12px",
+                                color: C.text,
+                                letterSpacing: "2px"
+                            }}>
+                                [ CLINIC LOCATOR ]
+                            </span>
+                        </div>
+
                         {/* ── Close button (X) ── */}
                         <button
                             onClick={onClose}
-                            className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center transition-transform hover:scale-110 active:scale-95"
+                            className="absolute -right-3 -top-3 z-10 flex h-10 w-10 items-center justify-center transition-transform hover:scale-110 active:scale-95"
                             style={{
-                                backgroundColor: "#8DA5D1",
-                                border: "3px solid #2D3E75",
-                                borderRadius: "4px",
-                                boxShadow: "1px 2px 0 #2D3E75",
-                                color: "#1A2B5A",
+                                backgroundColor: C.bg,
+                                border: `4px solid ${C.border}`,
+                                boxShadow: `3px 3px 0 ${C.border}`,
+                                color: C.text,
                                 fontWeight: 900,
-                                fontSize: "16px",
+                                fontSize: "18px",
                                 fontFamily: "monospace",
                                 lineHeight: 1,
+                                cursor: "pointer",
                             }}
                             aria-label="Close"
                         >
@@ -115,39 +146,35 @@ export function ClinicLocatorPrompt({
                         </button>
 
                         {/* ── Inner content area ── */}
-                        <div className="px-7 pb-7 pt-6">
-                            {/* Icon / Title */}
-                            <div className="mb-4 flex flex-col items-center">
-                                <span style={{ fontSize: "32px", filter: "drop-shadow(2px 2px 0 rgba(0,0,0,0.1))" }}>📍</span>
-                                <h2
-                                    className="mt-2 text-center"
-                                    style={{
-                                        fontFamily: "'Press Start 2P', 'Courier New', monospace",
-                                        fontSize: "12px",
-                                        letterSpacing: "1px",
-                                        color: "#1A2B5A",
-                                        textShadow: "1px 1px 0 rgba(255,255,255,0.5)",
-                                    }}
-                                >
-                                    CLINIC LOCATOR
-                                </h2>
-                            </div>
-
-                            {/* Main Content (ChatPage) */}
-                            <div
-                                className="pixel-scrollbar"
-                                style={{
-                                    backgroundColor: "#E1E8F5",
-                                    border: "3px solid #6D87C1",
-                                    borderRadius: "4px",
-                                    padding: "4px",
-                                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3)",
-                                    maxHeight: "70vh",
-                                    overflowY: "auto",
-                                }}
-                            >
+                        <div
+                            className="pixel-scrollbar"
+                            style={{
+                                padding: "8px",
+                                background: C.bgDark,
+                                maxHeight: "80vh",
+                                overflowY: "auto",
+                                borderBottom: `2px solid ${C.border}`,
+                            }}
+                        >
+                            <div style={{
+                                background: C.bg,
+                                border: `3px solid ${C.border}`,
+                                boxShadow: `inset 0 0 0 2px ${C.bgDark}`,
+                            }}>
                                 {children}
                             </div>
+                        </div>
+
+                        {/* ── Footer / Info ── */}
+                        <div style={{
+                            padding: "10px 16px",
+                            background: C.bgDark,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}>
+                            <span style={{ fontFamily: FONT, fontSize: "7px", color: C.muted }}>V1.0.4-BETA</span>
+                            <span className="blink" style={{ fontFamily: FONT, fontSize: "7px", color: C.gold }}>SYSTEM ACTIVE</span>
                         </div>
                     </div>
                 </div>
