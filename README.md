@@ -40,3 +40,40 @@ The scaffold currently exposes:
 - `GET /agents/financial`
 - `GET /agents/clinic-locator`
 - `GET /agents/monitoring`
+
+## Architecture
+
+The system uses an `Agent Orchestrator` to coordinate the six main agents in the dental workflow.
+
+```mermaid
+flowchart LR
+    U[Agent Orchestrator]
+
+    V[Vision / Intake Agent]
+    F[Financial Agent]
+    H[Habit Coaching Agent]
+    Sx[Surgery Agent]
+    D[Doctor Summary Agent]
+    S[Scheduling Agent]
+
+    U --> V
+    U --> F
+    U --> H
+    U --> Sx
+    U --> D
+    U --> S
+```
+
+## Main agents
+
+Visual Agent: analyzes uploaded teeth images and identifies visible issues.
+
+Financial Agent: retrieves and reasons over Sun Life insurance documentation using RAG.
+
+Habit Coaching Agent: generates personalized hygiene recommendations.
+
+Surgery Agent: runs a scan of the teeth and shows results.
+
+Doctor Summary Agent: orchestrates all outputs into a concise provider report.
+
+Scheduling Agent: pulls dentist information and availability for the user to schedule the next appointment.
