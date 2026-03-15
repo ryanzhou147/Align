@@ -164,7 +164,7 @@ The scaffold currently exposes:
 
 --- 
 
-## Quickstart
+## Quick Start
 
 ### 1) Backend (FastAPI)
 From `backend/`:
