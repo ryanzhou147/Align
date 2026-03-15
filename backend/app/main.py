@@ -9,6 +9,7 @@ from app.agents.financial.router import router as financial_router
 from app.agents.habit_coaching.router import router as habit_coaching_router
 from app.agents.monitoring.router import router as monitoring_router
 from app.agents.treatment_predictive.router import router as treatment_predictive_router
+from app.agents.doctor_summary.router import router as doctor_summary_router
 from app.core.orchestrator import router as orchestrator_router
 from app.pipeline.dental_model.router import router as dental_model_router
 
@@ -24,6 +25,7 @@ app.add_middleware(
 
 app.include_router(dental_model_router)
 app.include_router(orchestrator_router)
+app.include_router(doctor_summary_router)
 app.include_router(treatment_predictive_router)
 app.include_router(habit_coaching_router)
 app.include_router(financial_router)
