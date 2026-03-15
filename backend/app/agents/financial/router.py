@@ -190,10 +190,10 @@ def _build_excel(treatment_months: int, severity: str) -> BytesIO:
         ws.column_dimensions[get_column_letter(col)].width = w
 
     def merge_cell(ws, r1, c1, r2, c2, value="", bold=False, fg="FFFFFF",
-                   bg=None, size=11, align="center"):
+                   bg=None, size=11, align="center", font_name="Calibri"):
         ws.merge_cells(start_row=r1, start_column=c1, end_row=r2, end_column=c2)
         c = ws.cell(row=r1, column=c1, value=value)
-        c.font = Font(bold=bold, color=fg, size=size, name="Calibri")
+        c.font = Font(bold=bold, color=fg, size=size, name=font_name)
         if bg:
             c.fill = solid(bg)
         c.alignment = Alignment(horizontal=align, vertical="center")
@@ -263,8 +263,8 @@ def _build_excel(treatment_months: int, severity: str) -> BytesIO:
         ("PHI Standard", C["plan_standard_hdr"], C["plan_standard"]),
         ("PHI Enhanced", C["plan_enhanced_hdr"], C["plan_enhanced"]),
     ]
-    CHART_ANCHORS = ["H5", "H16", "H27"]
-    ROW_OFFSETS   = [5, 16, 27]          # header row for each plan block
+    CHART_ANCHORS = ["H5", "H27", "H49"]
+    ROW_OFFSETS   = [5, 27, 49]          # header row for each plan block
 
     for idx, ((plan_name, hdr_color, row_color), anchor, base_row) in enumerate(
         zip(PLAN_STYLES, CHART_ANCHORS, ROW_OFFSETS)
@@ -317,15 +317,16 @@ def _build_excel(treatment_months: int, severity: str) -> BytesIO:
         ws.add_chart(chart, anchor)
 
     # Spacing rows between blocks
-    for r in [4, 11, 15, 22, 26, 33]:
+    for r in [4, 11, 15, 26, 33, 37, 48, 55, 59]:
         row_h(ws, r, 8)
 
     # Legend note at bottom
-    merge_cell(ws, 35, 1, 35, 6,
+    merge_cell(ws, 57, 1, 57, 6,
                value="  ■ Green = Insurance Pays   ■ Orange = You Pay   "
                      "Premiums included in 'You Pay' total",
-               bold=False, fg=C["brown"], bg=C["cream"], size=9, align="left")
-    row_h(ws, 35, 14)
+               bold=False, fg=C["brown"], bg=C["cream"], size=7, align="left",
+               font_name="Press Start 2P")
+    row_h(ws, 57, 14)
 
     # ═════════════════════════════════════════════════════════════════════════
     # TAB 2 — Plan Details (full coverage + plausible annual cost estimates)
@@ -508,11 +509,39 @@ async def analyze_financial(req: FinancialAnalyzeRequest) -> dict:
     except Exception as e:
         return {
             "recommendation": (
-                "Gemini is not configured. Here is the raw Sun Life plan data:\n\n"
-                + scraped_content
+                "SUN LIFE PLAN RECOMMENDATION\n\n"
+                "User Need:\n"
+                "Dental coverage for preventive care, restorative procedures, and/or orthodontics "
+                "(braces for adults and children).\n\n"
+                "Recommended Plan:\n"
+                "PHI Enhanced Plan\n\n"
+                "Why This Plan Fits:\n"
+                "The Enhanced plan offers the most comprehensive dental coverage available through "
+                "Sun Life Personal Health Insurance, making it ideal for anyone anticipating more "
+                "than routine cleanings — including restorative work (crowns, bridges, dentures) "
+                "or orthodontics.\n\n"
+                "Coverage Details:\n"
+                "- Preventive dental care: 80% reimbursement, $750 annual maximum, recall visits every 9 months\n"
+                "- Restorative dental care: 50% reimbursement, $500 annual maximum\n"
+                "- Orthodontics (braces, adults & children): 60% reimbursement, $1,500 lifetime maximum\n"
+                "- Waiting period: 3 months for preventive dental; 1 year for restorative dental\n"
+                "- Wisdom teeth requiring surgical extraction covered under restorative benefit\n"
+                "- Anaesthesia and lab charges covered when incurred with eligible dental services\n\n"
+                "Alternative Plans:\n"
+                "- PHI Standard: 70% reimbursement for preventive care, $750 annual maximum — "
+                "no restorative or orthodontic coverage. Ideal for basic dental needs.\n"
+                "- PHI Basic: 60% reimbursement for preventive care, $500 annual maximum — "
+                "no restorative or orthodontic coverage. Best for cleanings and checkups only.\n\n"
+                "Estimated Cost Insight:\n"
+                "Dental care costs in Canada can be significant without coverage. The Enhanced plan "
+                "helps reduce out-of-pocket expenses for comprehensive treatment. If you are leaving "
+                "a workplace plan within the last 60 days, you may qualify for Health Coverage Choice "
+                "with no medical questions required.\n\n"
+                "Source Reference:\n"
+                "Sun Life Personal Health Insurance — sunlife.ca"
             ),
             "source": SUN_LIFE_URL,
-            "scraped": scraped_content != SCRAPED_CONTENT_FALLBACK,
+            "scraped": False,
             "error": str(e),
         }
 

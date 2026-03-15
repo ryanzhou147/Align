@@ -217,7 +217,10 @@ export default function DentistOffice() {
     };
 
     if (s === 0) return advance(1);
-    if (s === 1) return advance(2);
+    if (s === 1) {
+      if (e.key === "Escape" || e.key === "ArrowLeft") return advance(0);
+      return advance(2);
+    }
     if (s === 4) return advance(5);
     if (s === 5) {
       advancingRef.current = true;
@@ -383,7 +386,7 @@ export default function DentistOffice() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={STAGE_IMAGES[stage]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} draggable={false} />
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/60 text-sm animate-pulse">
+<div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/60 text-xs animate-pulse" style={{ fontFamily: "'Press Start 2P', monospace" }}>
           Press any key or click to continue
         </div>
       </div>
@@ -396,7 +399,7 @@ export default function DentistOffice() {
       <div className="w-screen h-screen overflow-hidden bg-black select-none relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/Starting_page3.png"
+          src="/Starting_page.png"
           alt=""
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
           draggable={false}
@@ -622,7 +625,7 @@ export default function DentistOffice() {
       )}
 
       {/* ── Agent activation circles ─────────────────────────────────────── */}
-      {showChar && AGENT_ZONES.map((az) => {
+      {false && showChar && AGENT_ZONES.map((az) => {
         const cx = imgLeft + az.wx * imgScale;
         const cy = imgTop + az.wy * imgScale;
         const r = az.r * imgScale;
@@ -715,15 +718,12 @@ export default function DentistOffice() {
           }}>
             <TreatmentPage initialFile={uploadedFile ?? undefined} />
           </div>
-          <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", color: "rgba(255,255,255,0.3)", fontSize: 11, pointerEvents: "none" }}>
-            Press any key to continue
-          </div>
         </div>
       )}
 
       {/* Hint */}
       {stage >= 4 && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-40 text-white/50 text-xs animate-pulse pointer-events-none">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-40 text-white/50 text-xs animate-pulse pointer-events-none" style={{ fontFamily: "'Press Start 2P', monospace" }}>
           {nearbyZone
             ? "Press SPACE to interact"
             : movementUnlocked.current && !charPulse

@@ -12,11 +12,11 @@ const DentalViewer = dynamic(() => import("./SurgeryViewer"), {
       alignItems: "center",
       justifyContent: "center",
       background: "#1a2a3a",
-      fontFamily: "'Press Start 2P', monospace",
-      fontSize: "8px",
-      color: "#4A7A9E",
+      fontFamily: "-apple-system, sans-serif",
+      fontSize: "13px",
+      color: "#94a3b8",
     }}>
-      LOADING 3D MODEL...
+      Loading 3D model...
     </div>
   ),
 });
@@ -24,33 +24,34 @@ const DentalViewer = dynamic(() => import("./SurgeryViewer"), {
 const API_BASE = "http://localhost:8000";
 
 const C = {
-  bg:      "#C5DCF0",
-  bgDark:  "#A2C4E0",
-  bgDeep:  "#7AAFD4",
-  border:  "#1A3A5E",
-  text:    "#0D1E30",
-  muted:   "#4A6E94",
-  gold:    "#1B6FAD",
-  goldBrt: "#4AAEE0",
-  red:     "#7A2020",
-  green:   "#2A5A1A",
-  page:    "#081525",
+  bg:      "#ffffff",
+  bgDark:  "#f3f4f6",
+  bgDeep:  "#eff6ff",
+  border:  "#e5e7eb",
+  text:    "#111827",
+  muted:   "#6b7280",
+  gold:    "#2563eb",
+  goldBrt: "#3b82f6",
+  red:     "#dc2626",
+  green:   "#16a34a",
+  page:    "#f8f9fa",
 };
 
-const FONT = "'Press Start 2P', monospace";
+const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 const panelStyle = (extra: React.CSSProperties = {}): React.CSSProperties => ({
-  background: C.bg,
-  border: `4px solid ${C.border}`,
-  boxShadow: `5px 5px 0 ${C.border}`,
+  background: "#ffffff",
+  border: `1px solid ${C.border}`,
+  borderRadius: 12,
+  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
   overflow: "hidden",
   ...extra,
 });
 
 const hdrStyle = (bg = C.bgDark): React.CSSProperties => ({
   background: bg,
-  borderBottom: `4px solid ${C.border}`,
-  padding: "8px 14px",
+  borderBottom: `1px solid ${C.border}`,
+  padding: "12px 16px",
   display: "flex",
   alignItems: "center",
   gap: 8,
@@ -59,23 +60,25 @@ const hdrStyle = (bg = C.bgDark): React.CSSProperties => ({
 
 const btnStyle = (variant: "primary" | "secondary" | "danger" = "primary"): React.CSSProperties => ({
   fontFamily: FONT,
-  fontSize: "8px",
-  padding: "10px 16px",
-  border: `3px solid ${C.border}`,
-  boxShadow: `3px 3px 0 ${C.border}`,
+  fontSize: "13px",
+  fontWeight: 500,
+  padding: "8px 16px",
+  border: variant === "primary" ? "none" : `1px solid ${C.border}`,
+  borderRadius: 8,
   cursor: "pointer",
-  lineHeight: 1,
-  background: variant === "primary" ? C.gold : variant === "danger" ? C.red + "44" : C.bgDeep,
-  color: variant === "primary" ? C.bg : variant === "danger" ? C.red : C.muted,
+  background: variant === "primary" ? C.gold : variant === "danger" ? "#fef2f2" : "#ffffff",
+  color: variant === "primary" ? "#ffffff" : variant === "danger" ? C.red : C.text,
+  boxShadow: "none",
 });
 
 const inputStyle: React.CSSProperties = {
   fontFamily: FONT,
-  fontSize: "8px",
+  fontSize: "14px",
   width: "100%",
-  background: C.bgDark,
-  border: `3px solid ${C.border}`,
-  padding: "9px 10px",
+  background: "#ffffff",
+  border: `1px solid ${C.border}`,
+  borderRadius: 8,
+  padding: "10px 12px",
   color: C.text,
   outline: "none",
 };
@@ -362,18 +365,19 @@ function SeverityChart() {
       {cavities.map(c => (
         <div key={c.tooth}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontFamily: FONT, fontSize: "6px", color: C.text }}>{c.label}</span>
-            <span style={{ fontFamily: FONT, fontSize: "6px", color: C.muted }}>{c.grade}  {c.depth}</span>
+            <span style={{ fontFamily: FONT, fontSize: "12px", color: C.text }}>{c.label}</span>
+            <span style={{ fontFamily: FONT, fontSize: "12px", color: C.muted }}>{c.grade}  {c.depth}</span>
           </div>
-          <div style={{ height: 14, background: C.bgDeep, border: `2px solid ${C.border}`, position: "relative" }}>
+          <div style={{ height: 14, background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 4, position: "relative", overflow: "hidden" }}>
             <div style={{
               position: "absolute", left: 0, top: 0, bottom: 0,
               width: `${c.pct}%`,
               background: c.pct > 80 ? C.red : c.pct > 60 ? C.gold : C.green,
+              borderRadius: 4,
             }} />
             <span style={{
               position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)",
-              fontFamily: FONT, fontSize: "6px", color: C.bg,
+              fontFamily: FONT, fontSize: "11px", color: "#ffffff",
             }}>{c.pct}%</span>
           </div>
         </div>
@@ -421,12 +425,14 @@ function SurgeryAgentTab() {
           <div style={{ ...hdrStyle(), gap: 0, padding: 0 }}>
             {(["3d", "photo"] as const).map(mode => (
               <button key={mode} onClick={() => setViewMode(mode)} style={{
-                fontFamily: FONT, fontSize: "7px", padding: "10px 18px",
-                border: "none", borderRight: `4px solid ${C.border}`, cursor: "pointer",
-                background: viewMode === mode ? C.bg : C.bgDark,
-                color: viewMode === mode ? C.text : C.muted, letterSpacing: "1px",
+                fontFamily: FONT, fontSize: "13px", fontWeight: 500, padding: "6px 14px",
+                border: `1px solid ${C.border}`,
+                borderRadius: mode === "3d" ? "8px 0 0 8px" : "0 8px 8px 0",
+                cursor: "pointer",
+                background: viewMode === mode ? C.gold : "#ffffff",
+                color: viewMode === mode ? "#ffffff" : C.muted,
               }}>
-                {mode === "3d" ? "◈ 3D MODEL" : "⊡ PHOTO VIEW"}
+                {mode === "3d" ? "⊞ 3D Model" : "⊡ Photo View"}
               </button>
             ))}
             <div style={{ flex: 1 }} />
@@ -435,9 +441,9 @@ function SurgeryAgentTab() {
                 className="px-btn"
                 disabled={!hasLoaded3D}
                 onClick={runScan}
-                style={{ ...btnStyle("secondary"), margin: "6px 8px 6px 12px", fontSize: "7px", padding: "8px 12px", border: `3px solid ${C.border}` }}
+                style={{ ...btnStyle("secondary"), margin: "6px 8px 6px 12px" }}
               >
-                {scanState === "done" ? "◈ RESCAN" : "◈ SCAN"}
+                {scanState === "done" ? "⊞ Rescan" : "⊞ Scan"}
               </button>
             )}
             {viewMode === "3d" && (
@@ -445,9 +451,9 @@ function SurgeryAgentTab() {
                 className="px-btn"
                 disabled={!hasLoaded3D || analyzeState === "analyzing"}
                 onClick={runAnalyze}
-                style={{ ...btnStyle("primary"), margin: "6px 12px 6px 0", fontSize: "7px", padding: "8px 14px" }}
+                style={{ ...btnStyle("primary"), margin: "6px 12px 6px 0" }}
               >
-                {analyzeState === "analyzing" ? "◆ ANALYZING..." : "▶ ANALYZE"}
+                {analyzeState === "analyzing" ? "Analyzing..." : "Analyze"}
               </button>
             )}
           </div>
@@ -459,8 +465,8 @@ function SurgeryAgentTab() {
 
             {viewMode === "photo" && (
               <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", background: C.bgDeep }}>
-                <div style={{ flex: "0 0 50%", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, borderRight: `3px solid ${C.border}` }}>
-                  <img src="/teeth_current.png" alt="Frontal photo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", border: `3px solid ${C.border}` }} />
+                <div style={{ flex: "0 0 50%", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, borderRight: `1px solid ${C.border}` }}>
+                  <img src="/teeth_current.png" alt="Frontal photo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", border: `1px solid ${C.border}`, borderRadius: 8 }} />
                 </div>
                 <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
                   <img src="/teethcolour.svg" alt="2D dental diagram" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
@@ -469,24 +475,24 @@ function SurgeryAgentTab() {
             )}
 
             {viewMode === "3d" && (
-              <div style={{ position: "absolute", bottom: 12, right: 12, width: 180, border: `3px solid ${C.border}`, boxShadow: `3px 3px 0 ${C.border}`, pointerEvents: "none" }}>
-                <div style={{ background: C.bgDark, borderBottom: `2px solid ${C.border}`, padding: "3px 6px", fontFamily: FONT, fontSize: "5px", color: C.muted, letterSpacing: "1px" }}>PHOTO REF</div>
+              <div style={{ position: "absolute", bottom: 12, right: 12, width: 180, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.3)", pointerEvents: "none" }}>
+                <div style={{ background: C.bgDark, borderBottom: `1px solid ${C.border}`, padding: "4px 8px", fontFamily: FONT, fontSize: "11px", color: C.muted }}>Photo Ref</div>
                 <img src="/teeth_current.png" alt="teeth ref" style={{ width: "100%", display: "block" }} />
               </div>
             )}
 
             {viewMode === "3d" && barScanState === "scanning" && (
               <div style={{ position: "absolute", inset: 0, zIndex: 10, background: "rgba(8,21,37,0.72)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18, pointerEvents: "none" }}>
-                <p style={{ fontFamily: FONT, fontSize: "7px", color: C.goldBrt, letterSpacing: "2px" }}>◆ SCANNING MODEL...</p>
-                <div style={{ width: 320, height: 10, background: C.bgDark, border: `2px solid ${C.border}` }}>
-                  <div style={{ height: "100%", background: C.goldBrt, animation: "scanBar 2.8s linear forwards" }} />
+                <p style={{ fontFamily: FONT, fontSize: "13px", color: C.goldBrt }}>Scanning model...</p>
+                <div style={{ width: 320, height: 6, background: C.bgDark, borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ height: "100%", background: C.goldBrt, animation: "scanBar 2.8s linear forwards", borderRadius: 3 }} />
                 </div>
               </div>
             )}
 
             {viewMode === "3d" && !hasLoaded3D && (
-              <div style={{ position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", padding: "6px 12px", fontFamily: FONT, fontSize: "6px", color: "#4A7A9E", pointerEvents: "none" }}>
-                LOADING MODEL...
+              <div style={{ position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.6)", padding: "6px 12px", borderRadius: 6, fontFamily: FONT, fontSize: "12px", color: "#94a3b8", pointerEvents: "none" }}>
+                Loading model...
               </div>
             )}
           </div>
@@ -526,15 +532,15 @@ function SurgeryAgentTab() {
             {/* Stat cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               {[
-                { label: "CAVITIES", value: "3", sub: "DETECTED", color: C.red },
-                { label: "ENAMEL", value: "1.8mm", sub: "AVG THICKNESS", color: C.text },
-                { label: "MAX DEPTH", value: "1.5mm", sub: "LESION D3", color: C.gold },
-                { label: "RDT MIN", value: "0.8mm", sub: "NEAR PULP", color: C.gold },
+                { label: "Cavities", value: "3", sub: "Detected", color: C.red },
+                { label: "Enamel", value: "1.8mm", sub: "Avg Thickness", color: C.text },
+                { label: "Max Depth", value: "1.5mm", sub: "Lesion D3", color: C.gold },
+                { label: "RDT Min", value: "0.8mm", sub: "Near Pulp", color: C.gold },
               ].map(s => (
                 <div key={s.label} style={{ ...panelStyle(), padding: "14px 16px" }}>
-                  <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted, marginBottom: 6, letterSpacing: "1px" }}>{s.label}</p>
-                  <p style={{ fontFamily: FONT, fontSize: "14px", color: s.color, marginBottom: 4 }}>{s.value}</p>
-                  <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted }}>{s.sub}</p>
+                  <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted, marginBottom: 6, fontWeight: 500 }}>{s.label}</p>
+                  <p style={{ fontFamily: FONT, fontSize: "22px", fontWeight: 700, color: s.color, marginBottom: 4 }}>{s.value}</p>
+                  <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted }}>{s.sub}</p>
                 </div>
               ))}
             </div>
@@ -544,27 +550,27 @@ function SurgeryAgentTab() {
               {/* Torque chart */}
               <div style={panelStyle()}>
                 <div style={hdrStyle()}>
-                  <span style={{ fontSize: "8px", color: C.text }}>[ DRILL TORQUE PROFILE ]</span>
+                  <span style={{ fontFamily: FONT, fontSize: "13px", fontWeight: 600, color: C.text }}>Drill Torque Profile</span>
                 </div>
                 <div style={{ padding: "12px 14px" }}>
                   <TorqueChart />
                   <div style={{ display: "flex", gap: 14, marginTop: 8, flexWrap: "wrap" }}>
                     {[
-                      { color: C.muted, label: "ENAMEL" },
+                      { color: C.muted, label: "Enamel" },
                       { color: "#4AAEE0", label: "DEJ" },
-                      { color: C.muted, label: "DENTIN" },
-                      { color: C.red, label: "⚠ NEAR PULP" },
+                      { color: C.muted, label: "Dentin" },
+                      { color: C.red, label: "⚠ Near Pulp" },
                     ].map(l => (
                       <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <div style={{ width: 8, height: 8, background: l.color }} />
-                        <span style={{ fontFamily: FONT, fontSize: "5px", color: C.muted }}>{l.label}</span>
+                        <div style={{ width: 8, height: 8, background: l.color, borderRadius: 2 }} />
+                        <span style={{ fontFamily: FONT, fontSize: "11px", color: C.muted }}>{l.label}</span>
                       </div>
                     ))}
                   </div>
-                  <div style={{ marginTop: 10, background: C.bgDeep, border: `2px solid ${C.border}`, padding: "8px 10px" }}>
-                    <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted, marginBottom: 4 }}>RECOMMENDED DRILL SPEED</p>
-                    <p style={{ fontFamily: FONT, fontSize: "8px", color: C.text }}>800 – 3,000 RPM</p>
-                    <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted, marginTop: 4 }}>SLOW-SPEED MICROMOTOR · WATER COOLING REQUIRED</p>
+                  <div style={{ marginTop: 10, background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px" }}>
+                    <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted, marginBottom: 4 }}>Recommended Drill Speed</p>
+                    <p style={{ fontFamily: FONT, fontSize: "14px", fontWeight: 600, color: C.text }}>800 – 3,000 RPM</p>
+                    <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted, marginTop: 4 }}>Slow-speed micromotor · Water cooling required</p>
                   </div>
                 </div>
               </div>
@@ -572,26 +578,26 @@ function SurgeryAgentTab() {
               {/* Cavity severity */}
               <div style={panelStyle()}>
                 <div style={hdrStyle()}>
-                  <span style={{ fontSize: "8px", color: C.text }}>[ CAVITY SEVERITY (ICDAS) ]</span>
+                  <span style={{ fontFamily: FONT, fontSize: "13px", fontWeight: 600, color: C.text }}>Cavity Severity (ICDAS)</span>
                 </div>
                 <div style={{ padding: "12px 14px" }}>
                   <SeverityChart />
                   <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    <div style={{ background: C.bgDeep, border: `2px solid ${C.border}`, padding: "8px 10px" }}>
-                      <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted, marginBottom: 4 }}>DRILL DEPTH TARGET</p>
-                      <p style={{ fontFamily: FONT, fontSize: "9px", color: C.gold }}>0.9 – 1.3 MM</p>
+                    <div style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px" }}>
+                      <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted, marginBottom: 4 }}>Drill Depth Target</p>
+                      <p style={{ fontFamily: FONT, fontSize: "14px", fontWeight: 600, color: C.gold }}>0.9 – 1.3 mm</p>
                     </div>
-                    <div style={{ background: C.bgDeep, border: `2px solid ${C.border}`, padding: "8px 10px" }}>
-                      <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted, marginBottom: 4 }}>PULP CLEARANCE</p>
-                      <p style={{ fontFamily: FONT, fontSize: "9px", color: C.green }}>&gt; 0.8 MM ✔</p>
+                    <div style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px" }}>
+                      <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted, marginBottom: 4 }}>Pulp Clearance</p>
+                      <p style={{ fontFamily: FONT, fontSize: "14px", fontWeight: 600, color: C.green }}>&gt; 0.8 mm ✔</p>
                     </div>
-                    <div style={{ background: C.bgDeep, border: `2px solid ${C.border}`, padding: "8px 10px" }}>
-                      <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted, marginBottom: 4 }}>TORQUE MAX</p>
-                      <p style={{ fontFamily: FONT, fontSize: "9px", color: C.text }}>38 Ncm</p>
+                    <div style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px" }}>
+                      <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted, marginBottom: 4 }}>Torque Max</p>
+                      <p style={{ fontFamily: FONT, fontSize: "14px", fontWeight: 600, color: C.text }}>38 Ncm</p>
                     </div>
-                    <div style={{ background: C.bgDeep, border: `2px solid ${C.border}`, padding: "8px 10px" }}>
-                      <p style={{ fontFamily: FONT, fontSize: "5px", color: C.muted, marginBottom: 4 }}>RISK LEVEL</p>
-                      <p style={{ fontFamily: FONT, fontSize: "9px", color: C.gold }}>MODERATE</p>
+                    <div style={{ background: C.bgDeep, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px" }}>
+                      <p style={{ fontFamily: FONT, fontSize: "11px", color: C.muted, marginBottom: 4 }}>Risk Level</p>
+                      <p style={{ fontFamily: FONT, fontSize: "14px", fontWeight: 600, color: C.gold }}>Moderate</p>
                     </div>
                   </div>
                 </div>
@@ -757,68 +763,67 @@ export default function DoctorPage() {
   const renderSummary = (text: string) =>
     text.split("\n").map((line, i) => {
       const t = line.trim();
-      if (!t) return <div key={i} style={{ height: "10px" }} />;
+      if (!t) return <div key={i} style={{ height: "8px" }} />;
       if (t === "DOCTOR SUMMARY PAGE") return (
-        <p key={i} style={{ fontSize: "11px", color: C.text, marginBottom: "14px", letterSpacing: "2px", borderBottom: `3px solid ${C.border}`, paddingBottom: "8px" }}>{t}</p>
+        <p key={i} style={{ fontSize: "18px", fontWeight: 700, color: C.text, marginBottom: "12px", borderBottom: `1px solid ${C.border}`, paddingBottom: "8px", fontFamily: FONT }}>{t}</p>
       );
       if (/^[A-Z][A-Za-z /]+$/.test(t) && t.length > 3 && !t.startsWith("-")) return (
-        <p key={i} style={{ fontSize: "8px", color: C.gold, marginBottom: "6px", marginTop: "4px", letterSpacing: "2px" }}>{t}</p>
+        <p key={i} style={{ fontSize: "13px", fontWeight: 600, color: C.gold, marginBottom: "6px", marginTop: "12px", fontFamily: FONT }}>{t}</p>
       );
       if (t.startsWith("-")) return (
-        <p key={i} style={{ fontSize: "7px", color: C.text, lineHeight: "2.4", marginBottom: "3px", paddingLeft: "10px" }}>{t}</p>
+        <p key={i} style={{ fontSize: "14px", color: C.text, lineHeight: "1.6", marginBottom: "4px", paddingLeft: "12px", fontFamily: FONT }}>{t}</p>
       );
-      return <p key={i} style={{ fontSize: "7px", color: C.text, lineHeight: "2.4", marginBottom: "3px" }}>{line}</p>;
+      return <p key={i} style={{ fontSize: "14px", color: C.text, lineHeight: "1.6", marginBottom: "4px", fontFamily: FONT }}>{line}</p>;
     });
 
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <main style={{ background: C.page, minHeight: "100vh", fontFamily: FONT, display: "flex", flexDirection: "column" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         * { box-sizing: border-box; }
-        .px-btn { transition: transform 60ms, box-shadow 60ms; }
-        .px-btn:hover:not(:disabled) { transform: translate(3px,3px); box-shadow: none !important; }
-        .px-btn:disabled { opacity:.35; cursor:not-allowed !important; }
-        input:focus, textarea:focus { border-color: ${C.goldBrt} !important; outline: none; }
+        .px-btn { transition: background 120ms, box-shadow 120ms; }
+        .px-btn:hover:not(:disabled) { filter: brightness(0.95); }
+        .px-btn:disabled { opacity:.45; cursor:not-allowed !important; }
+        input:focus, textarea:focus { border-color: #2563eb !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.1) !important; outline: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { display: inline-block; animation: spin .8s linear infinite; }
         @keyframes ghostPulse { 0%,100%{opacity:.15} 50%{opacity:.38} }
         @keyframes scanBar { from { width: 0% } to { width: 100% } }
-        .ghost { background: ${C.bgDeep}; animation: ghostPulse 1.2s ease-in-out infinite; border-radius: 2px; }
+        .ghost { background: #e5e7eb; animation: ghostPulse 1.2s ease-in-out infinite; border-radius: 6px; }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: ${C.bgDark}; }
-        ::-webkit-scrollbar-thumb { background: ${C.border}; }
-        input[type=range] { -webkit-appearance:none; appearance:none; height:8px; background:${C.bgDeep}; border:3px solid ${C.border}; outline:none; cursor:pointer; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; background:${C.gold}; border:3px solid ${C.border}; cursor:pointer; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        input[type=range] { -webkit-appearance:none; appearance:none; height:4px; background:#e5e7eb; border-radius:2px; outline:none; cursor:pointer; border: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:#2563eb; border-radius:50%; cursor:pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
       `}</style>
 
       {/* Top bar */}
-      <div style={{ background: C.bgDark, borderBottom: `4px solid ${C.border}`, padding: "10px 20px", display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
-        <span style={{ fontSize: 22 }}>🩺</span>
-        <span style={{ fontSize: "10px", color: C.text }}>DOCTOR DASHBOARD</span>
+      <div style={{ background: "#ffffff", borderBottom: `1px solid ${C.border}`, padding: "12px 24px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        <span style={{ fontSize: 22 }}>🦷</span>
+        <span style={{ fontSize: "18px", fontWeight: 700, color: C.gold, fontFamily: FONT }}>Align</span>
+        <span style={{ fontSize: "13px", color: C.muted, marginLeft: 8, fontFamily: FONT }}>Doctor Dashboard</span>
       </div>
 
       {/* Tab bar */}
-      <div style={{ background: C.bgDark, borderBottom: `4px solid ${C.border}`, display: "flex", flexShrink: 0 }}>
+      <div style={{ background: "#ffffff", borderBottom: `1px solid ${C.border}`, display: "flex", padding: "0 24px", flexShrink: 0 }}>
         {(["dashboard", "surgery"] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
               fontFamily: FONT,
-              fontSize: "8px",
-              padding: "10px 20px",
+              fontSize: "14px",
+              fontWeight: activeTab === tab ? 600 : 400,
+              padding: "12px 16px",
               border: "none",
-              borderRight: `4px solid ${C.border}`,
-              borderBottom: activeTab === tab ? `4px solid ${C.bg}` : "none",
-              marginBottom: activeTab === tab ? "-4px" : 0,
+              borderBottom: activeTab === tab ? `2px solid ${C.gold}` : "2px solid transparent",
+              marginBottom: "-1px",
               cursor: "pointer",
-              background: activeTab === tab ? C.bg : "transparent",
-              color: activeTab === tab ? C.text : C.muted,
-              letterSpacing: "1px",
+              background: "transparent",
+              color: activeTab === tab ? C.gold : C.muted,
             }}
           >
-            [ {tab === "dashboard" ? "DASHBOARD" : "SURGERY AGENT"} ]
+            {tab === "dashboard" ? "Patient Information" : "Surgery Agent"}
           </button>
         ))}
       </div>
@@ -828,15 +833,15 @@ export default function DoctorPage() {
       <div style={{ flex: 1, overflow: "hidden", minHeight: 0, display: activeTab === "dashboard" ? "flex" : "none" }}>
 
         {/* ── Left sidebar ─────────────────────────────────────────────────── */}
-        <div style={{ width: "240px", flexShrink: 0, background: C.bgDeep, borderRight: `4px solid ${C.border}`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div style={{ padding: "10px 14px", borderBottom: `3px solid ${C.border}`, flexShrink: 0 }}>
-            <p style={{ fontSize: "8px", color: C.text, letterSpacing: "2px" }}>PATIENTS</p>
+        <div style={{ width: "220px", flexShrink: 0, background: "#ffffff", borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+            <p style={{ fontSize: "12px", fontWeight: 600, color: C.muted, letterSpacing: "0.05em", fontFamily: FONT, textTransform: "uppercase" }}>Patients</p>
           </div>
 
           <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
             {patients.length === 0 && (
-              <p style={{ fontSize: "7px", color: C.muted, textAlign: "center", marginTop: "20px", lineHeight: "2.4" }}>
-                NO PATIENTS YET.
+              <p style={{ fontSize: "13px", color: C.muted, textAlign: "center", marginTop: "20px", lineHeight: "1.6", fontFamily: FONT }}>
+                No patients yet.
               </p>
             )}
             {patients.map(p => (
@@ -845,34 +850,33 @@ export default function DoctorPage() {
                 onClick={() => selectPatient(p.id)}
                 className="px-btn"
                 style={{
-                  background: selectedId === p.id ? C.bg : C.bgDark,
-                  border: `3px solid ${selectedId === p.id ? C.gold : C.border}`,
-                  boxShadow: selectedId === p.id ? `3px 3px 0 ${C.gold}` : "none",
+                  background: selectedId === p.id ? C.gold : "transparent",
+                  borderRadius: 8,
                   padding: "10px 12px",
-                  marginBottom: "8px",
+                  marginBottom: "2px",
                   cursor: "pointer",
                 }}
               >
-                <p style={{ fontSize: "8px", color: C.text, marginBottom: "5px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <p style={{ fontSize: "14px", fontWeight: 500, color: selectedId === p.id ? "#ffffff" : C.text, marginBottom: "3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: FONT }}>
                   {p.name}
                 </p>
-                <p style={{ fontSize: "6px", color: C.muted, marginBottom: "4px" }}>AGE {p.age}</p>
-                {p.status === "loading"    && <p style={{ fontSize: "6px", color: C.goldBrt }}>◆ ANALYZING...</p>}
-                {p.status === "done" && p.summaryStatus === "loading" && <p style={{ fontSize: "6px", color: C.goldBrt }}>◆ GENERATING NOTE...</p>}
-                {p.status === "done" && p.summaryStatus === "done"    && <p style={{ fontSize: "6px", color: C.green }}>✔ READY</p>}
-                {p.status === "done" && p.summaryStatus === "idle"    && <p style={{ fontSize: "6px", color: C.muted }}>— PENDING</p>}
-                {p.status === "error"      && <p style={{ fontSize: "6px", color: C.red }}>✖ ERROR</p>}
+                <p style={{ fontSize: "12px", color: selectedId === p.id ? "rgba(255,255,255,0.75)" : C.muted, fontFamily: FONT }}>Age {p.age}</p>
+                {p.status === "loading"    && <p style={{ fontSize: "11px", color: selectedId === p.id ? "rgba(255,255,255,0.9)" : C.goldBrt, marginTop: 2, fontFamily: FONT }}>Analyzing...</p>}
+                {p.status === "done" && p.summaryStatus === "loading" && <p style={{ fontSize: "11px", color: selectedId === p.id ? "rgba(255,255,255,0.9)" : C.goldBrt, marginTop: 2, fontFamily: FONT }}>Generating note...</p>}
+                {p.status === "done" && p.summaryStatus === "done"    && <p style={{ fontSize: "11px", color: selectedId === p.id ? "rgba(255,255,255,0.85)" : C.green, marginTop: 2, fontFamily: FONT }}>✓ Ready</p>}
+                {p.status === "done" && p.summaryStatus === "idle"    && <p style={{ fontSize: "11px", color: selectedId === p.id ? "rgba(255,255,255,0.75)" : C.muted, marginTop: 2, fontFamily: FONT }}>Pending</p>}
+                {p.status === "error"      && <p style={{ fontSize: "11px", color: selectedId === p.id ? "rgba(255,255,255,0.85)" : C.red, marginTop: 2, fontFamily: FONT }}>Error</p>}
               </div>
             ))}
           </div>
 
-          <div style={{ padding: "12px", borderTop: `3px solid ${C.border}`, flexShrink: 0 }}>
+          <div style={{ padding: "12px", borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
             <button
               className="px-btn"
               style={{ ...btnStyle("primary"), width: "100%", textAlign: "center" }}
               onClick={() => setShowAdd(true)}
             >
-              + ADD PATIENT
+              + Add Patient
             </button>
           </div>
         </div>
@@ -884,8 +888,8 @@ export default function DoctorPage() {
             <div style={{ ...panelStyle({ borderStyle: "dashed" }), maxWidth: 600, margin: "60px auto" }}>
               <div style={{ padding: "50px 30px", textAlign: "center" }}>
                 <div style={{ fontSize: 52, marginBottom: 16 }}>🩺</div>
-                <p style={{ fontSize: "9px", color: C.muted, lineHeight: "2.8" }}>
-                  SELECT A PATIENT FROM THE LEFT<br />OR ADD A NEW ONE TO BEGIN
+                <p style={{ fontSize: "14px", color: C.muted, lineHeight: "1.8", fontFamily: FONT }}>
+                  Select a patient from the left<br />or add a new one to begin
                 </p>
               </div>
             </div>
@@ -894,15 +898,15 @@ export default function DoctorPage() {
           {selected?.status === "loading" && (
             <div style={{ ...panelStyle(), maxWidth: 700, margin: "0 auto" }}>
               <div style={hdrStyle()}>
-                <span className="spin" style={{ fontSize: "14px", color: C.goldBrt }}>⟳</span>
-                <span style={{ fontSize: "9px", color: C.text }}>ANALYZING PATIENT...</span>
+                <span className="spin" style={{ fontSize: "16px", color: C.goldBrt }}>⟳</span>
+                <span style={{ fontSize: "14px", fontWeight: 500, color: C.text, fontFamily: FONT }}>Analyzing patient...</span>
               </div>
               <div style={{ padding: "40px 24px", textAlign: "center" }}>
-                <p style={{ fontSize: "8px", color: C.muted, lineHeight: "2.8" }}>
-                  RUNNING TREATMENT ANALYSIS...<br />
-                  GENERATING HABIT COACHING...<br />
-                  CHECKING INSURANCE COVERAGE...<br />
-                  SYNTHESIZING CLINICAL SUMMARY...
+                <p style={{ fontSize: "14px", color: C.muted, lineHeight: "2.0", fontFamily: FONT }}>
+                  Running treatment analysis...<br />
+                  Generating habit coaching...<br />
+                  Checking insurance coverage...<br />
+                  Synthesizing clinical summary...
                 </p>
               </div>
             </div>
@@ -910,11 +914,11 @@ export default function DoctorPage() {
 
           {selected?.status === "error" && (
             <div style={{ ...panelStyle({ borderColor: C.red }), maxWidth: 700, margin: "0 auto" }}>
-              <div style={{ ...hdrStyle(C.red + "33"), borderBottomColor: C.red }}>
-                <span style={{ fontSize: "10px", color: C.red }}>✖ ANALYSIS FAILED</span>
+              <div style={{ ...hdrStyle("#fef2f2"), borderBottomColor: C.red }}>
+                <span style={{ fontSize: "14px", fontWeight: 600, color: C.red, fontFamily: FONT }}>Analysis Failed</span>
               </div>
               <div style={{ padding: "20px 24px" }}>
-                <p style={{ fontSize: "8px", color: C.red, lineHeight: "2.4" }}>{selected.error}</p>
+                <p style={{ fontSize: "14px", color: C.red, lineHeight: "1.6", fontFamily: FONT }}>{selected.error}</p>
               </div>
             </div>
           )}
@@ -933,34 +937,34 @@ export default function DoctorPage() {
 
                 {/* Patient header */}
                 <div style={panelStyle()}>
-                  <div style={{ padding: "12px 18px", display: "flex", alignItems: "center", gap: 16 }}>
+                  <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 16 }}>
                     <div>
-                      <p style={{ fontSize: "12px", color: C.text, marginBottom: "6px" }}>{selected.name}</p>
-                      <p style={{ fontSize: "7px", color: C.muted, lineHeight: "2.2" }}>
-                        AGE {selected.age} &nbsp;◆&nbsp; {selected.chief_complaint.toUpperCase()}
+                      <p style={{ fontSize: "20px", fontWeight: 700, color: C.text, marginBottom: "6px", fontFamily: FONT }}>{selected.name}</p>
+                      <p style={{ fontSize: "13px", color: C.muted, lineHeight: "1.5", fontFamily: FONT }}>
+                        Age {selected.age} &nbsp;·&nbsp; {selected.chief_complaint}
                       </p>
                     </div>
-                    <div style={{ marginLeft: "auto", display: "flex", gap: 22 }}>
+                    <div style={{ marginLeft: "auto", display: "flex", gap: 24 }}>
                       <div style={{ textAlign: "center" }}>
-                        <p style={{ fontSize: "6px", color: C.muted, marginBottom: "4px" }}>SEVERITY</p>
-                        <p style={{ fontSize: "9px", color: r.analysis.severity === "severe" ? C.red : r.analysis.severity === "mild" ? C.green : C.gold }}>
-                          {r.analysis.severity.toUpperCase()}
+                        <p style={{ fontSize: "11px", color: C.muted, marginBottom: "4px", fontFamily: FONT }}>Severity</p>
+                        <p style={{ fontSize: "16px", fontWeight: 600, color: r.analysis.severity === "severe" ? C.red : r.analysis.severity === "mild" ? C.green : C.gold, fontFamily: FONT }}>
+                          {r.analysis.severity.charAt(0).toUpperCase() + r.analysis.severity.slice(1)}
                         </p>
                       </div>
                       <div style={{ textAlign: "center" }}>
-                        <p style={{ fontSize: "6px", color: C.muted, marginBottom: "4px" }}>DURATION</p>
-                        <p style={{ fontSize: "9px", color: C.text }}>{r.analysis.estimated_months} MO</p>
+                        <p style={{ fontSize: "11px", color: C.muted, marginBottom: "4px", fontFamily: FONT }}>Duration</p>
+                        <p style={{ fontSize: "16px", fontWeight: 600, color: C.text, fontFamily: FONT }}>{r.analysis.estimated_months} mo</p>
                       </div>
                       <div style={{ textAlign: "center" }}>
-                        <p style={{ fontSize: "6px", color: C.muted, marginBottom: "4px" }}>BRACES</p>
-                        <p style={{ fontSize: "9px", color: r.analysis.suitable_for_braces ? C.green : C.red }}>
-                          {r.analysis.suitable_for_braces ? "YES" : "NO"}
+                        <p style={{ fontSize: "11px", color: C.muted, marginBottom: "4px", fontFamily: FONT }}>Braces</p>
+                        <p style={{ fontSize: "16px", fontWeight: 600, color: r.analysis.suitable_for_braces ? C.green : C.red, fontFamily: FONT }}>
+                          {r.analysis.suitable_for_braces ? "Yes" : "No"}
                         </p>
                       </div>
                       {r.analysis.cavities_detected && (
                         <div style={{ textAlign: "center" }}>
-                          <p style={{ fontSize: "6px", color: C.muted, marginBottom: "4px" }}>CAVITIES</p>
-                          <p style={{ fontSize: "9px", color: C.red }}>DETECTED</p>
+                          <p style={{ fontSize: "11px", color: C.muted, marginBottom: "4px", fontFamily: FONT }}>Cavities</p>
+                          <p style={{ fontSize: "16px", fontWeight: 600, color: C.red, fontFamily: FONT }}>Detected</p>
                         </div>
                       )}
                     </div>
@@ -973,15 +977,15 @@ export default function DoctorPage() {
                   {/* Timeline */}
                   <div style={{ ...panelStyle(), flex: "0 0 380px", display: "flex", flexDirection: "column" }}>
                     <div style={hdrStyle()}>
-                      <span style={{ fontSize: "9px", color: C.text }}>[ TREATMENT TIMELINE ]</span>
+                      <span style={{ fontFamily: FONT, fontSize: "13px", fontWeight: 600, color: C.text }}>Treatment Timeline</span>
                     </div>
                     <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <p style={{ fontSize: "8px", color: C.gold }}>{stage.label.toUpperCase()}</p>
-                        <p style={{ fontSize: "7px", color: C.muted }}>{stage.month === 0 ? "TODAY" : `MONTH ${stage.month}`}</p>
+                        <p style={{ fontSize: "14px", fontWeight: 600, color: C.gold, fontFamily: FONT }}>{stage.label}</p>
+                        <p style={{ fontSize: "12px", color: C.muted, fontFamily: FONT }}>{stage.month === 0 ? "Today" : `Month ${stage.month}`}</p>
                       </div>
                       {/* Image viewer */}
-                      <div style={{ position: "relative", width: "100%", paddingBottom: "75%", background: C.bgDark, border: `3px solid ${C.border}` }}>
+                      <div style={{ position: "relative", width: "100%", paddingBottom: "75%", background: C.bgDark, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
                         {timeline.map((s, i) => {
                           const src = s.image_b64
                             ? `data:image/jpeg;base64,${s.image_b64}`
@@ -1015,12 +1019,13 @@ export default function DoctorPage() {
                         {timeline.map((s, i) => (
                           <div key={i} onClick={() => setSliderIdx(i)} style={{ cursor: "pointer", textAlign: "center" }}>
                             <div style={{
-                              width: 10, height: 10, margin: "0 auto 4px",
-                              background: i === sliderIdx ? C.gold : C.bgDeep,
-                              border: `2px solid ${C.border}`,
+                              width: 12, height: 12, margin: "0 auto 4px",
+                              background: i === sliderIdx ? C.gold : "#ffffff",
+                              border: `2px solid ${i === sliderIdx ? C.gold : C.border}`,
+                              borderRadius: "50%",
                             }} />
-                            <p style={{ fontSize: "5px", color: i === sliderIdx ? C.text : C.muted, whiteSpace: "nowrap" }}>
-                              {s.month === 0 ? "NOW" : `M${s.month}`}
+                            <p style={{ fontSize: "11px", color: i === sliderIdx ? C.gold : C.muted, whiteSpace: "nowrap", fontFamily: FONT, fontWeight: i === sliderIdx ? 600 : 400 }}>
+                              {s.month === 0 ? "Now" : `M${s.month}`}
                             </p>
                           </div>
                         ))}
@@ -1031,25 +1036,25 @@ export default function DoctorPage() {
                   {/* Clinical note */}
                   <div style={{ ...panelStyle(), flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
                     <div style={hdrStyle()}>
-                      <span style={{ fontSize: "9px", color: C.text }}>[ CLINICAL NOTE ]</span>
+                      <span style={{ fontFamily: FONT, fontSize: "13px", fontWeight: 600, color: C.text }}>Clinical Note</span>
                       {selected.summaryStatus === "loading" && (
-                        <span className="spin" style={{ marginLeft: "auto", fontSize: "12px", color: C.goldBrt }}>⟳</span>
+                        <span className="spin" style={{ marginLeft: "auto", fontSize: "14px", color: C.goldBrt }}>⟳</span>
                       )}
                     </div>
                     <div style={{ padding: "16px 18px", overflowY: "auto", maxHeight: "520px" }}>
                       {selected.summaryStatus === "loading" && (
-                        <p style={{ fontSize: "7px", color: C.muted, lineHeight: "2.6" }}>
-                          GENERATING CLINICAL SUMMARY...
+                        <p style={{ fontSize: "14px", color: C.muted, lineHeight: "1.8", fontFamily: FONT }}>
+                          Generating clinical summary...
                         </p>
                       )}
                       {selected.summaryStatus === "error" && (
-                        <p style={{ fontSize: "7px", color: C.red, lineHeight: "2.6" }}>
-                          FAILED TO GENERATE SUMMARY.
+                        <p style={{ fontSize: "14px", color: C.red, lineHeight: "1.8", fontFamily: FONT }}>
+                          Failed to generate summary.
                         </p>
                       )}
                       {(selected.summaryStatus === "done" || selected.summaryStatus === "idle") && r.summary && renderSummary(r.summary)}
                       {selected.summaryStatus === "idle" && !r.summary && (
-                        <p style={{ fontSize: "7px", color: C.muted, lineHeight: "2.6" }}>SELECT PATIENT TO GENERATE NOTE.</p>
+                        <p style={{ fontSize: "14px", color: C.muted, lineHeight: "1.8", fontFamily: FONT }}>Select patient to generate note.</p>
                       )}
                     </div>
                   </div>
@@ -1060,16 +1065,16 @@ export default function DoctorPage() {
                 {r.analysis.issues.length > 0 && (
                   <div style={panelStyle()}>
                     <div style={hdrStyle()}>
-                      <span style={{ fontSize: "9px", color: C.text }}>[ CLINICAL OBSERVATIONS ]</span>
+                      <span style={{ fontFamily: FONT, fontSize: "13px", fontWeight: 600, color: C.text }}>Clinical Observations</span>
                     </div>
                     <div style={{ padding: "12px 16px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
                       {r.analysis.issues.map((issue, i) => (
-                        <span key={i} style={{ fontSize: "7px", background: C.bgDark, border: `2px solid ${C.border}`, padding: "5px 10px", color: C.text }}>
+                        <span key={i} style={{ fontSize: "13px", background: C.bgDark, border: `1px solid ${C.border}`, borderRadius: 20, padding: "4px 12px", color: C.text, fontFamily: FONT }}>
                           {issue}
                         </span>
                       ))}
                       {r.analysis.cavity_notes && (
-                        <span style={{ fontSize: "7px", background: C.red + "22", border: `2px solid ${C.red}`, padding: "5px 10px", color: C.red }}>
+                        <span style={{ fontSize: "13px", background: "#fef2f2", border: `1px solid ${C.red}`, borderRadius: 20, padding: "4px 12px", color: C.red, fontFamily: FONT }}>
                           ⚠ {r.analysis.cavity_notes}
                         </span>
                       )}
@@ -1086,43 +1091,43 @@ export default function DoctorPage() {
       {/* ── Add Patient Modal ─────────────────────────────────────────────────── */}
       {showAdd && (
         <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
           onClick={e => { if (e.target === e.currentTarget) setShowAdd(false); }}
         >
           <div style={panelStyle({ width: "min(92vw, 520px)" })}>
             <div style={hdrStyle()}>
-              <span style={{ fontSize: "10px", color: C.text }}>[ ADD NEW PATIENT ]</span>
+              <span style={{ fontFamily: FONT, fontSize: "15px", fontWeight: 600, color: C.text }}>Add New Patient</span>
               <button className="px-btn" style={{ ...btnStyle("secondary"), marginLeft: "auto", padding: "6px 10px" }} onClick={() => setShowAdd(false)}>✕</button>
             </div>
             <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: "14px" }}>
               <div>
-                <p style={{ fontSize: "7px", color: C.muted, marginBottom: "8px", letterSpacing: "2px" }}>TEETH PHOTO</p>
+                <p style={{ fontSize: "12px", fontWeight: 600, color: C.muted, marginBottom: "8px", fontFamily: FONT }}>Teeth Photo</p>
                 <div
-                  style={{ border: `3px dashed ${C.border}`, background: C.bgDark, padding: "16px", textAlign: "center", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 80 }}
+                  style={{ border: `2px dashed ${C.border}`, borderRadius: 8, background: C.bgDark, padding: "16px", textAlign: "center", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 80 }}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {formPreview
-                    ? <img src={formPreview} alt="preview" style={{ height: 64, border: `2px solid ${C.border}` }} />
-                    : <p style={{ fontSize: "8px", color: C.muted, lineHeight: "2.2" }}>CLICK TO UPLOAD<br />TEETH PHOTO</p>
+                    ? <img src={formPreview} alt="preview" style={{ height: 64, borderRadius: 6, border: `1px solid ${C.border}` }} />
+                    : <p style={{ fontSize: "13px", color: C.muted, lineHeight: "1.6", fontFamily: FONT }}>Click to upload<br />teeth photo</p>
                   }
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={pickFile} />
               </div>
               <div>
-                <p style={{ fontSize: "7px", color: C.muted, marginBottom: "6px", letterSpacing: "2px" }}>PATIENT NAME</p>
+                <p style={{ fontSize: "12px", fontWeight: 600, color: C.muted, marginBottom: "6px", fontFamily: FONT }}>Patient Name</p>
                 <input style={inputStyle} type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Full name" />
               </div>
               <div>
-                <p style={{ fontSize: "7px", color: C.muted, marginBottom: "6px", letterSpacing: "2px" }}>AGE</p>
+                <p style={{ fontSize: "12px", fontWeight: 600, color: C.muted, marginBottom: "6px", fontFamily: FONT }}>Age</p>
                 <input style={inputStyle} type="number" min={1} max={120} value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} placeholder="Age" />
               </div>
               <div>
-                <p style={{ fontSize: "7px", color: C.muted, marginBottom: "6px", letterSpacing: "2px" }}>CHIEF COMPLAINT</p>
+                <p style={{ fontSize: "12px", fontWeight: 600, color: C.muted, marginBottom: "6px", fontFamily: FONT }}>Chief Complaint</p>
                 <input style={inputStyle} type="text" value={form.complaint} onChange={e => setForm(f => ({ ...f, complaint: e.target.value }))} placeholder="e.g. crooked teeth, pain" />
               </div>
-              {formError && <p style={{ fontSize: "7px", color: C.red }}>{formError}</p>}
-              <button className="px-btn" style={{ ...btnStyle("primary"), width: "100%", textAlign: "center", padding: "14px" }} onClick={submitPatient}>
-                ▶ ANALYZE PATIENT
+              {formError && <p style={{ fontSize: "13px", color: C.red, fontFamily: FONT }}>{formError}</p>}
+              <button className="px-btn" style={{ ...btnStyle("primary"), width: "100%", textAlign: "center", padding: "12px" }} onClick={submitPatient}>
+                Analyze Patient
               </button>
             </div>
           </div>
