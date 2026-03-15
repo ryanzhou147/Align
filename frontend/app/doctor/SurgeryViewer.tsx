@@ -133,66 +133,98 @@ export default function SurgeryViewer({ onLoad, revealLines, planeScan }: Surger
     const scene = sceneRef.current;
 
     const SCAN_DURATION = 5000;
-    const Y_START = 90;
-    const Y_END   = -90;
+    const Y_START = 90;  const Y_END = -90;
+    const Z_START = -120; const Z_END = 120;
 
     // Reset all lines to hidden
     lineMeshesRef.current.forEach(mesh => {
       (mesh.material as THREE.MeshBasicMaterial).opacity = 0;
     });
 
-    // Scan plane — square flat horizontal plane
-    const planeGeo = new THREE.PlaneGeometry(200, 200);
-    const planeMat = new THREE.MeshBasicMaterial({
+    // --- Top-to-bottom plane (horizontal, sweeps down) ---
+    const planeGeoY = new THREE.PlaneGeometry(200, 200);
+    const planeMatY = new THREE.MeshBasicMaterial({
       color: 0x4AAEE0, transparent: true, opacity: 0.18,
       side: THREE.DoubleSide, depthTest: false,
     });
-    const plane = new THREE.Mesh(planeGeo, planeMat);
-    plane.rotation.x = Math.PI / 2;
-    plane.renderOrder = 1000;
-    scene.add(plane);
+    const planeY = new THREE.Mesh(planeGeoY, planeMatY);
+    planeY.rotation.x = Math.PI / 2;
+    planeY.renderOrder = 1000;
+    scene.add(planeY);
 
-    // Bright leading edge glow line
-    const glowGeo = new THREE.PlaneGeometry(200, 1.2);
-    const glowMat = new THREE.MeshBasicMaterial({
+    const glowGeoY = new THREE.PlaneGeometry(200, 1.2);
+    const glowMatY = new THREE.MeshBasicMaterial({
       color: 0x88ddff, transparent: true, opacity: 0.95,
       side: THREE.DoubleSide, depthTest: false,
     });
-    const glow = new THREE.Mesh(glowGeo, glowMat);
-    glow.rotation.x = Math.PI / 2;
-    glow.renderOrder = 1001;
-    scene.add(glow);
+    const glowY = new THREE.Mesh(glowGeoY, glowMatY);
+    glowY.rotation.x = Math.PI / 2;
+    glowY.renderOrder = 1001;
+    scene.add(glowY);
+
+    // --- Back-to-front plane (vertical, sweeps forward along Z) ---
+    const planeGeoZ = new THREE.PlaneGeometry(200, 200);
+    const planeMatZ = new THREE.MeshBasicMaterial({
+      color: 0x4AAEE0, transparent: true, opacity: 0,
+      side: THREE.DoubleSide, depthTest: false,
+    });
+    const planeZ = new THREE.Mesh(planeGeoZ, planeMatZ);
+    // no rotation — PlaneGeometry is already in XY, facing Z
+    planeZ.renderOrder = 1000;
+    scene.add(planeZ);
+
+    const glowGeoZ = new THREE.PlaneGeometry(200, 1.2);
+    const glowMatZ = new THREE.MeshBasicMaterial({
+      color: 0x88ddff, transparent: true, opacity: 0,
+      side: THREE.DoubleSide, depthTest: false,
+    });
+    const glowZ = new THREE.Mesh(glowGeoZ, glowMatZ);
+    glowZ.renderOrder = 1001;
+    scene.add(glowZ);
 
     const startTime = performance.now();
+    const FADE_MS = 600;
+    const revealedAt = new Map<THREE.Mesh, number>();
     let rafId: number;
 
     const tick = () => {
-      const progress = Math.min((performance.now() - startTime) / SCAN_DURATION, 1);
+      const now = performance.now();
+      const progress = Math.min((now - startTime) / SCAN_DURATION, 1);
+
+      // Top-to-bottom
       const currentY = Y_START + (Y_END - Y_START) * progress;
+      planeY.position.y = currentY;
+      glowY.position.y  = currentY - 1.5;
 
-      plane.position.y = currentY;
-      glow.position.y  = currentY - 1.5;
+      // Front-to-back
+      const currentZ = Z_START + (Z_END - Z_START) * progress;
+      planeZ.position.z = currentZ;
+      glowZ.position.z  = currentZ - 1.5;
 
-      // Reveal lines whose midpoint has been passed by the plane
       lineMeshesRef.current.forEach(mesh => {
-        if ((mesh.material as THREE.MeshBasicMaterial).opacity === 0 && mesh.position.y >= currentY) {
-          (mesh.material as THREE.MeshBasicMaterial).opacity = 0.8;
+        const mat = mesh.material as THREE.MeshBasicMaterial;
+        const passed = mesh.position.y >= currentY || mesh.position.z <= currentZ;
+
+        if (passed && !revealedAt.has(mesh)) {
+          revealedAt.set(mesh, now);
+        }
+
+        const t = revealedAt.get(mesh);
+        if (t !== undefined) {
+          const fadeProgress = Math.min((now - t) / FADE_MS, 1);
+          mat.opacity = (1 - Math.pow(1 - fadeProgress, 2)) * 0.8;
         }
       });
 
       if (progress < 1) {
         rafId = requestAnimationFrame(tick);
       } else {
-        // Reveal any remaining lines and clean up
         lineMeshesRef.current.forEach(mesh => {
           (mesh.material as THREE.MeshBasicMaterial).opacity = 0.8;
         });
-        scene.remove(plane);
-        scene.remove(glow);
-        planeGeo.dispose();
-        planeMat.dispose();
-        glowGeo.dispose();
-        glowMat.dispose();
+        [planeY, glowY, planeZ, glowZ].forEach(m => scene.remove(m));
+        [planeGeoY, glowGeoY, planeGeoZ, glowGeoZ].forEach(g => g.dispose());
+        [planeMatY, glowMatY, planeMatZ, glowMatZ].forEach(m => m.dispose());
       }
     };
 

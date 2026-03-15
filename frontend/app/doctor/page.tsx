@@ -430,30 +430,26 @@ function SurgeryAgentTab() {
               </button>
             ))}
             <div style={{ flex: 1 }} />
-            <button
-              className="px-btn"
-              disabled={!hasLoaded3D}
-              onClick={runScan}
-              style={{ ...btnStyle("secondary"), margin: "6px 4px 6px 12px", fontSize: "7px", padding: "8px 12px", border: `3px solid ${C.border}` }}
-            >
-              {scanState === "done" ? "◈ RESCAN A" : "◈ SCAN A"}
-            </button>
-            <button
-              className="px-btn"
-              disabled={!hasLoaded3D || barScanState === "scanning"}
-              onClick={runBarScan}
-              style={{ ...btnStyle("secondary"), margin: "6px 8px 6px 0", fontSize: "7px", padding: "8px 12px", border: `3px solid ${C.border}` }}
-            >
-              {barScanState === "scanning" ? "◆ SCANNING..." : barScanState === "done" ? "◈ RESCAN B" : "◈ SCAN B"}
-            </button>
-            <button
-              className="px-btn"
-              disabled={!hasLoaded3D || analyzeState === "analyzing"}
-              onClick={runAnalyze}
-              style={{ ...btnStyle("primary"), margin: "6px 12px 6px 0", fontSize: "7px", padding: "8px 14px" }}
-            >
-              {analyzeState === "analyzing" ? "◆ ANALYZING..." : "▶ ANALYZE"}
-            </button>
+            {viewMode === "3d" && (
+              <button
+                className="px-btn"
+                disabled={!hasLoaded3D}
+                onClick={runScan}
+                style={{ ...btnStyle("secondary"), margin: "6px 8px 6px 12px", fontSize: "7px", padding: "8px 12px", border: `3px solid ${C.border}` }}
+              >
+                {scanState === "done" ? "◈ RESCAN" : "◈ SCAN"}
+              </button>
+            )}
+            {viewMode === "3d" && (
+              <button
+                className="px-btn"
+                disabled={!hasLoaded3D || analyzeState === "analyzing"}
+                onClick={runAnalyze}
+                style={{ ...btnStyle("primary"), margin: "6px 12px 6px 0", fontSize: "7px", padding: "8px 14px" }}
+              >
+                {analyzeState === "analyzing" ? "◆ ANALYZING..." : "▶ ANALYZE"}
+              </button>
+            )}
           </div>
 
           <div style={{ height: 560, position: "relative", background: "#1a2a3a" }}>
@@ -467,7 +463,7 @@ function SurgeryAgentTab() {
                   <img src="/teeth_current.png" alt="Frontal photo" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", border: `3px solid ${C.border}` }} />
                 </div>
                 <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-                  <img src="/2D_TEETH.png" alt="2D dental diagram" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                  <img src="/teethcolour.svg" alt="2D dental diagram" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
                 </div>
               </div>
             )}
@@ -800,7 +796,6 @@ export default function DoctorPage() {
       <div style={{ background: C.bgDark, borderBottom: `4px solid ${C.border}`, padding: "10px 20px", display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
         <span style={{ fontSize: 22 }}>🩺</span>
         <span style={{ fontSize: "10px", color: C.text }}>DOCTOR DASHBOARD</span>
-        <span style={{ fontSize: "7px", color: C.muted, marginLeft: 8 }}>◆ ORCHESTRATING AGENT ◆</span>
       </div>
 
       {/* Tab bar */}
