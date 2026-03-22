@@ -394,6 +394,18 @@ function SurgeryAgentTab() {
   const [hasLoaded3D, setHasLoaded3D] = useState(false);
   const [planeScan, setPlaneScan] = useState(false);
   const [revealMarkings, setRevealMarkings] = useState(false);
+  const [drawMode, setDrawMode] = useState(false);
+  const [annotations, setAnnotations] = useState<{ sx: number; sy: number; sz: number; ex: number; ey: number; ez: number }[]>([]);
+
+  const exportAnnotations = () => {
+    const blob = new Blob([JSON.stringify(annotations, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "dental-annotations.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const runScan = () => {
     setPlaneScan(false);
@@ -449,6 +461,25 @@ function SurgeryAgentTab() {
             {viewMode === "3d" && (
               <button
                 className="px-btn"
+                disabled={!hasLoaded3D}
+                onClick={() => setDrawMode(d => !d)}
+                style={{ ...btnStyle(drawMode ? "primary" : "secondary"), margin: "6px 4px" }}
+              >
+                {drawMode ? "✏ Drawing..." : "✏ Draw"}
+              </button>
+            )}
+            {viewMode === "3d" && annotations.length > 0 && (
+              <button
+                className="px-btn"
+                onClick={exportAnnotations}
+                style={{ ...btnStyle("secondary"), margin: "6px 8px 6px 0" }}
+              >
+                ↓ Export
+              </button>
+            )}
+            {viewMode === "3d" && (
+              <button
+                className="px-btn"
                 disabled={!hasLoaded3D || analyzeState === "analyzing"}
                 onClick={runAnalyze}
                 style={{ ...btnStyle("primary"), margin: "6px 12px 6px 0" }}
@@ -460,7 +491,7 @@ function SurgeryAgentTab() {
 
           <div style={{ height: 560, position: "relative", background: "#1a2a3a" }}>
             <div style={{ position: "absolute", inset: 0, display: viewMode === "3d" ? "flex" : "none", flexDirection: "column" }}>
-              <DentalViewer onLoad={() => setHasLoaded3D(true)} revealLines={revealMarkings} planeScan={planeScan} />
+              <DentalViewer onLoad={() => setHasLoaded3D(true)} revealLines={revealMarkings} planeScan={planeScan} drawMode={drawMode} onAnnotationsChange={setAnnotations} />
             </div>
 
             {viewMode === "photo" && (
