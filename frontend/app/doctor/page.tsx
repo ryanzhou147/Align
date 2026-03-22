@@ -387,7 +387,7 @@ function SeverityChart() {
 }
 
 function SurgeryAgentTab() {
-  const [viewMode, setViewMode] = useState<"3d" | "photo">("3d");
+  const [viewMode, setViewMode] = useState<"3d" | "photo">("photo");
   const [scanState, setScanState] = useState<"idle" | "done">("idle");
   const [barScanState, setBarScanState] = useState<"idle" | "scanning" | "done">("idle");
   const [analyzeState, setAnalyzeState] = useState<"idle" | "analyzing" | "done">("idle");
@@ -443,7 +443,7 @@ function SurgeryAgentTab() {
                 onClick={runScan}
                 style={{ ...btnStyle("secondary"), margin: "6px 8px 6px 12px" }}
               >
-                {scanState === "done" ? "⊞ Rescan" : "⊞ Scan"}
+                {scanState === "done" ? "⊞ Overlay" : "⊞ Overlay"}
               </button>
             )}
             {viewMode === "3d" && (
@@ -614,7 +614,7 @@ function SurgeryAgentTab() {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function DoctorPage() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "surgery">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "surgery">("surgery");
   const [patients, setPatients]       = useState<Patient[]>([]);
   const [selectedId, setSelectedId]   = useState<string | null>(null);
   const [showAdd, setShowAdd]         = useState(false);

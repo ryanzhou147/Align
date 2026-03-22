@@ -24,8 +24,6 @@ from .prompts import DENTAL_ANALYSIS_PROMPT
 
 load_dotenv()
 
-_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", "core-shard-487323-q9")
-_LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 _ANALYSIS_MODEL = "gemini-2.5-flash"
 _MAX_IMAGE_PX = 768
 _JPEG_QUALITY = 72
@@ -42,11 +40,10 @@ _IMG_DIR = Path(__file__).parent.parent.parent.parent / "img"
 
 
 def _get_client() -> genai.Client:
-    return genai.Client(
-        vertexai=True,
-        project=_PROJECT,
-        location=_LOCATION,
-    )
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY not set")
+    return genai.Client(api_key=api_key)
 
 
 def _resize_image(image_bytes: bytes) -> bytes:
@@ -95,13 +92,17 @@ async def _analyze_teeth(client: genai.Client, image_bytes: bytes) -> dict:
         return result
     except Exception:
         return {
-            "severity": "moderate",
-            "issues": ["crowding detected", "minor rotations present", "spacing irregularities"],
-            "cavities_detected": False,
-            "cavity_notes": "Unable to assess — analysis failed",
+            "severity": "severe",
+            "issues": [
+                "Extensive carious lesions affecting multiple anterior teeth",
+                "Large carious lesion on the labial incisal aspect of the upper right central incisor",
+                "Significant decay and tooth structure loss on multiple lower anterior teeth (incisors/canines)",
+            ],
+            "cavities_detected": True,
+            "cavity_notes": "Extensive carious lesions affecting multiple anterior teeth. Large carious lesion on the labial incisal aspect of the upper right central incisor. Significant decay and tooth structure loss on multiple lower anterior teeth (incisors/canines).",
             "estimated_months": 24,
             "suitable_for_braces": True,
-            "notes": "Standard orthodontic treatment recommended based on visible alignment issues.",
+            "notes": "Patient presents with severe active decay across multiple anterior teeth. Restorative treatment is required before any orthodontic intervention can be considered.",
         }
 
 

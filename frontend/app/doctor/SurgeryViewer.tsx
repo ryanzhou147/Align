@@ -203,7 +203,7 @@ export default function SurgeryViewer({ onLoad, revealLines, planeScan }: Surger
 
       lineMeshesRef.current.forEach(mesh => {
         const mat = mesh.material as THREE.MeshBasicMaterial;
-        const passed = mesh.position.y >= currentY || mesh.position.z <= currentZ;
+        const passed = mesh.position.y >= currentY;
 
         if (passed && !revealedAt.has(mesh)) {
           revealedAt.set(mesh, now);
