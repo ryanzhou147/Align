@@ -461,25 +461,6 @@ function SurgeryAgentTab() {
             {viewMode === "3d" && (
               <button
                 className="px-btn"
-                disabled={!hasLoaded3D}
-                onClick={() => setDrawMode(d => !d)}
-                style={{ ...btnStyle(drawMode ? "primary" : "secondary"), margin: "6px 4px" }}
-              >
-                {drawMode ? "✏ Drawing..." : "✏ Draw"}
-              </button>
-            )}
-            {viewMode === "3d" && annotations.length > 0 && (
-              <button
-                className="px-btn"
-                onClick={exportAnnotations}
-                style={{ ...btnStyle("secondary"), margin: "6px 8px 6px 0" }}
-              >
-                ↓ Export
-              </button>
-            )}
-            {viewMode === "3d" && (
-              <button
-                className="px-btn"
                 disabled={!hasLoaded3D || analyzeState === "analyzing"}
                 onClick={runAnalyze}
                 style={{ ...btnStyle("primary"), margin: "6px 12px 6px 0" }}
